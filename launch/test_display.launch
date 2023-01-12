@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<launch>
+	<!-- this launches four nodes that rvix uses to place the robot -->
+    <param name="robot_description" textfile="$(find assignment2)/urdf/mobile_manipulator.urdf" />
+  
+    <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" ></node>
+
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" /> 
+
+	<node name="rviz" pkg="rviz" type="rviz" args="-d $(find assignment2)/config/mobile_manipulator_test.rviz" />
+
+
+
+
+</launch>
