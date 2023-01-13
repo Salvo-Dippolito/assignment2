@@ -1,0 +1,17 @@
+###### The motion planning interface
+
+### Action Server Goal
+
+string move_to
+
+---
+
+### Action Server Result
+
+bool location_reached
+
+---
+
+### Action Server Feedback
+
+float32 meters_to_destination

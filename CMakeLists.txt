@@ -8,6 +8,7 @@ project(assignment2)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
+  actionlib_msgs
   roscpp
   rospy
   message_generation
@@ -59,14 +60,18 @@ add_service_files(
  )
 
 ## Generate actions in the 'action' folder
-# add_action_files(
-#   FILES
-#   Action1.action
-#   Action2.action
-# )
+ add_action_files(
+   FILES
+   ChooseMove.action
+   ExecuteMove.action
+ )
 
 ## Generate added messages and services with any dependencies listed here
-generate_messages()
+ generate_messages(
+   DEPENDENCIES
+   actionlib_msgs#   
+   std_msgs
+ )
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##

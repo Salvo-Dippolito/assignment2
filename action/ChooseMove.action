@@ -1,0 +1,16 @@
+###### Choose Move Action Server
+
+### Action Server Goal
+
+bool start_plan
+
+---
+
+### Action Server Result
+
+string chosen_room
+
+---
+
+
+

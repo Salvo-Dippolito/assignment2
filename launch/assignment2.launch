@@ -77,10 +77,14 @@
   
   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen"/>
 
-    <!-- Start Rviz -->  
-   <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" ></node>
+  <!-- Start Rviz -->  
+  <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" ></node>
 
    
-   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find assignment2)/config/mobile_manipulator.rviz" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find assignment2)/config/mobile_manipulator.rviz" />
+
+
+<!-- finite state machine nodes -->
+<include file="$(find assignment2)/launch/surveyor.launch"/>
 
 </launch>
