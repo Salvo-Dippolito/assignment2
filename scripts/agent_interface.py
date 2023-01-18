@@ -30,6 +30,7 @@ from std_msgs.msg import Bool
 
 from assignment2.msg import ExecuteMoveFeedback, ExecuteMoveResult, ExecuteMoveGoal, ExecuteMoveAction
 from assignment2.msg import ChooseMoveFeedback, ChooseMoveResult, ChooseMoveGoal, ChooseMoveAction
+from assignment2.msg import ReadRoomFeedback, ReadRoomResult, ReadRoomGoal, ReadRoomAction
 
 
 # A class to simplify the implementation of a client for ROS action servers. It is used by the `InterfaceHelper` class.
@@ -183,6 +184,9 @@ class AgentState:
         self.choose_move_client = ActionClientHelper('choose_move',ChooseMoveAction, mutex=self.mutex)
 
         self.execute_move_client = ActionClientHelper('execute_move',ExecuteMoveAction,feedback_callback = self.move_feedback_cb, mutex=self.mutex)
+
+        self.read_room_client = ActionClientHelper('read_room',ReadRoomAction, mutex=self.mutex)
+
 
     
     def move_feedback_cb(self,feedback):

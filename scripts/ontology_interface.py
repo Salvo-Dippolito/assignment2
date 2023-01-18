@@ -38,7 +38,7 @@ class HandleOntology():
 
 	def __init__(self):
 
-		self.client = ArmorClient('surveyor','map_ontology')
+		self.client = ArmorClient('surveyor_','map_ontology_')
 		self.locations_list=[]
 		self.doors_list=[]
 		

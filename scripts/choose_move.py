@@ -50,7 +50,7 @@ class ChoosingMove(object):
                                       auto_start=False)
         self._as.start()
 
-        self.client = ArmorClient("surveyor","map_ontology")
+        self.client = ArmorClient('surveyor_','map_ontology_')
     
     def clean_room_strings(self,room_list):
 

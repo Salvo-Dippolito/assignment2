@@ -495,6 +495,8 @@
 <gazebo reference="camera_link">
   <material>Gazebo/Red</material>
 </gazebo>
+
+
 <!--########################## BASE TRANSMISSIONS ############################################-->
 <transmission name="front_left_wheel_trans" type="SimpleTransmission">
   <type>transmission_interface/SimpleTransmission</type>
@@ -543,6 +545,7 @@
 
 
 <!--################################ ARM TRANSIMISSIONS ######################################-->
+
 <transmission name="arm_base_trans" type="SimpleTransmission">
   <type>transmission_interface/SimpleTransmission</type>
   <actuator name="arm_base_motor">

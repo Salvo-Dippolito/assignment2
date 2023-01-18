@@ -55,7 +55,7 @@ class Moving2Location:
                                       auto_start=False)
         self._as.start()
 
-        self.client = ArmorClient('surveyor','map_ontology')
+        self.client = ArmorClient('surveyor_','map_ontology_')
         
 
 

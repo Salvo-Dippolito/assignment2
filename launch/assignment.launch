@@ -77,6 +77,14 @@
    
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find assignment2)/config/mobile_manipulator.rviz" />
 
+<arg name="markerSize"      default="0.05"/>    <!-- in m -->
+<arg name="side"             default="left"/>
+<arg name="ref_frame"       default="base"/>  <!-- leave empty and the pose will be published wrt param parent_name -->
 
+
+<node pkg="aruco_ros" type="marker_publisher" name="aruco_marker_publisher" output= "screen" launch-prefix="xterm -e" args="/image:=/camera1/image_raw
+">
+
+</node>
 
 </launch>

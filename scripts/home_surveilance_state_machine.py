@@ -29,6 +29,7 @@ from armor_api.armor_client import ArmorClient
 
 from assignment2.msg import ExecuteMoveFeedback, ExecuteMoveResult, ExecuteMoveGoal, ExecuteMoveAction
 from assignment2.msg import ChooseMoveFeedback, ChooseMoveResult, ChooseMoveGoal, ChooseMoveAction
+from assignment2.msg import ReadRoomFeedback, ReadRoomResult, ReadRoomGoal, ReadRoomAction
 from agent_interface import AgentState
 
 
@@ -49,9 +50,29 @@ class Load_Map(smach.State):
 
         rospy.loginfo('Executing state LOAD MAP')
         
-        self.handle_ontology.create_floor_ontology()
+        # self.handle_ontology.create_floor_ontology()
+        goal = ReadRoomGoal(start_reading = True)
+        self.comunicate_to_agent.read_room_client.send_goal(goal)
+
+        while not rospy.is_shutdown(): 
+
+            self.comunicate_to_agent.mutex.acquire()
+            try:
+                           
+                if  self.comunicate_to_agent.is_battery_low():
+                    print('\n')
+                    rospy.loginfo(simple_colors.magenta('Interrupting state LOAD_MAP since the battery is too low\n'))
+                    self.comunicate_to_agent.read_room_client.cancel_goals()  
+                    return 'go_charge'
+
+                if  self.comunicate_to_agent.read_room_client.is_done():
+                    return 'map_loaded'
+
+            finally:
+                
+                self.comunicate_to_agent.mutex.release()
        
-        return 'map_loaded'
+        
 
 class Charging(smach.State):
     """
