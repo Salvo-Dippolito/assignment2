@@ -1,12 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 
-
-
-<!-- finite state machine nodes -->
-<!-- <include file="$(find assignment2)/launch/surveyor.launch"/> -->
-
-    <!-- these are the arguments you can pass this launch file, for example paused:=true -->
+  <!-- these are the arguments you can pass this launch file, for example paused:=true -->
   <arg name="paused" default="false"/>
   <arg name="use_sim_time" default="true"/>
   <arg name="extra_gazebo_args" default=""/>
@@ -53,7 +48,7 @@
   </group>
   
   
-  <node name="marker_server" pkg="assignment2" type="marker_server" />
+ 
 
   <!-- robot model -->
 
@@ -68,9 +63,7 @@
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model mobile_manipulator
               -x $(arg x) -y $(arg y) -z $(arg z)" />
 
-  
-
-
+  <!-- robot arm controller -->
   <rosparam command="load" file="$(find assignment2)/config/arm_control.yaml" />
   <node name="arm_controller_spawner" pkg="controller_manager" type="controller_manager" args="spawn arm_controller" respawn="false" output="screen"/>
   
@@ -88,19 +81,21 @@
    
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find assignment2)/config/mobile_manipulator.rviz" />
 
+<!-- Start ARUCO -->
 <arg name="markerSize"      default="0.05"/>    <!-- in m -->
 <arg name="side"             default="left"/>
 <arg name="ref_frame"       default="base"/>  <!-- leave empty and the pose will be published wrt param parent_name -->
 
-
-<node pkg="aruco_ros" type="marker_publisher" name="aruco_marker_publisher" output= "screen" launch-prefix="xterm -e">
-  <remap from="/camera_info" to="/cameras/$(arg side)_hand_camera/camera_info" />
-  <remap from="/image" to="/cameras/$(arg side)_hand_camera/image" />
-  <param name="image_is_rectified" value="True"/>
-  <param name="marker_size"        value="$(arg markerSize)"/>
-  <param name="reference_frame"    value="$(arg ref_frame)"/>   <!-- frame in which the marker pose will be refered -->
-  <param name="camera_frame"       value="$(arg side)_hand_camera"/>
+<node pkg="aruco_ros" type="marker_publisher" name="aruco_marker_publisher" output= "screen" launch-prefix="xterm -e" args="/image:=/camera1/image_raw
+">
 </node>
+
+<node pkg="assignment2" type="marker_server_id" name="marker_service_id" output= "screen" launch-prefix="xterm -e" 
+args="/image:=/camera1/image_raw" >
+</node>
+
+
+ <node name="marker_server" pkg="assignment2" type="marker_server" />
 
 	
 

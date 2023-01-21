@@ -12,7 +12,12 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+
   message_generation
+  std_srvs
+  aruco_ros
+  cv_bridge
+  image_transport
 )
 
 ## System dependencies are found with CMake's conventions
@@ -58,6 +63,7 @@ add_message_files(
 add_service_files(
    FILES
    RoomInformation.srv
+   
  )
 
 ## Generate actions in the 'action' folder
@@ -72,6 +78,8 @@ add_service_files(
    DEPENDENCIES
    actionlib_msgs#   
    std_msgs
+   std_srvs
+   assignment2
  )
 
 ################################################
@@ -134,7 +142,8 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
- add_executable(marker_server src/marker_server.cpp)
+ add_executable(marker_server    src/marker_server.cpp)
+ add_executable(marker_server_id src/marker_id_service.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -148,6 +157,10 @@ add_dependencies(marker_server ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPO
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(marker_server
+   ${catkin_LIBRARIES}
+ )
+
+  target_link_libraries(marker_server_id
    ${catkin_LIBRARIES}
  )
 

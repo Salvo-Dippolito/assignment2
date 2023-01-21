@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+
+<launch>
+    <!-- Run the architecture's component and test it based on random-based stimulus. -->
+    
+    <node pkg="armor"
+          type="execute"
+          name="armor_service" 
+          
+ 
+          args="it.emarolab.armor.ARMORMainService"
+          launch-prefix= "xterm -e"
+
+    > </node>
+
+
+  
+
+</launch>

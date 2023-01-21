@@ -42,8 +42,7 @@
 #include <cv_bridge/cv_bridge.h>
 #include <sensor_msgs/image_encodings.h>
 
-class ArucoMarkerPublisher
-{
+class ArucoMarkerPublisher{
 private:
   // ArUco stuff
   aruco::MarkerDetector mDetector_;
@@ -67,10 +66,12 @@ private:
 public:
   ArucoMarkerPublisher() :
       nh_("~"), it_(nh_), useCamInfo_(true)
+  
   {
     image_sub_ = it_.subscribe("/image", 1, &ArucoMarkerPublisher::image_callback, this);
     image_pub_ = it_.advertise("result", 1);
     debug_pub_ = it_.advertise("debug", 1);
+    marker_id_pub_= it_.advertise("/detected_id",1);
     
     nh_.param<bool>("use_camera_info", useCamInfo_, false);
     camParam_ = aruco::CameraParameters();
@@ -80,6 +81,7 @@ public:
   {
     bool publishImage = image_pub_.getNumSubscribers() > 0;
     bool publishDebug = debug_pub_.getNumSubscribers() > 0;
+    bool publishMarkerID = marker_id_pub_.getNumSubscribers() > 0;
 
     ros::Time curr_stamp = msg->header.stamp;
     cv_bridge::CvImagePtr cv_ptr;
@@ -120,6 +122,16 @@ public:
 
       // publish image after internal image processing
       if (publishDebug)
+      {
+        // show also the internal image resulting from the threshold operation
+        cv_bridge::CvImage debug_msg;
+        debug_msg.header.stamp = curr_stamp;
+        debug_msg.encoding = sensor_msgs::image_encodings::MONO8;
+        debug_msg.image = mDetector_.getThresholdedImage();
+        debug_pub_.publish(debug_msg.toImageMsg());
+      }
+
+       if (publishMarkerID)
       {
         // show also the internal image resulting from the threshold operation
         cv_bridge::CvImage debug_msg;
