@@ -127,7 +127,7 @@ def move_to_joint_angles(c):
 	msg.header.stamp = rospy.Time.now()
 	msg.points.append(point)
 	pub.publish(msg)
-	rospy.sleep(8)
+	rospy.sleep(2)
 
 def giggle(old_configuration):
 	
@@ -156,6 +156,9 @@ if __name__ == '__main__':
 
 	configurations=[ [0,0.8,-0.4,0,-0.8],[0,1.5,-0.4,0,-0.8],[-1.57,1.2,-0.4,0.2,-1],[1.35,1.7,-0.4,0,-0.8],[3.2,0.1,-0.2,0,-0.3],[3,0.3,0.4,0,-0.3],[0.55,1.7,-0.4,0,-0.8]]
 	print("\n============================================================\n")
+
+	move_to_joint_angles([0,0,0,0,0])
+	
 
 	for configuration in configurations:
 		current_configuration=configuration

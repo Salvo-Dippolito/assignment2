@@ -29,6 +29,8 @@ from armor_api.armor_manipulation_client import ArmorManipulationClient
 from armor_api.armor_query_client import ArmorQueryClient
 from armor_api.armor_utils_client import ArmorUtilsClient
 
+from test_move2 import ReadRoomCreateOntology
+
 
 
     
@@ -68,25 +70,21 @@ class ReadFromPoses:
         
 
 
-            if self._as.is_preempt_requested():
-                self._as.set_preempted()
-                success = False
-                return
+            # if self._as.is_preempt_requested():
+            #     self._as.set_preempted()
+            #     success = False
+            #     return
 
 
             
             feedback.meters_to_destination = dist_to_location-meters_traveled
             self._as.publish_feedback(feedback)
 
-        self.move_robot(goal.move_to)
-        result.location_reached = True   
 
         if success:
             self._as.set_succeeded(result)
             return
 
-
-    
 
 if __name__ == '__main__':
 

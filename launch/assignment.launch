@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
 	
-	  <!-- these are the arguments you can pass this launch file, for example paused:=true -->
+  <!-- these are the arguments you can pass this launch file, for example paused:=true -->
   <arg name="paused" default="false"/>
   <arg name="use_sim_time" default="true"/>
   <arg name="extra_gazebo_args" default=""/>
@@ -57,6 +57,7 @@
   <arg name="z" default="0"/>
 
   <param name="robot_description" textfile="$(find assignment2)/urdf/mobile_manipulator.urdf" />
+
   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" args="-param robot_description -urdf -model mobile_manipulator
               -x $(arg x) -y $(arg y) -z $(arg z)" />
   
@@ -75,8 +76,7 @@
 
   <!-- Start Rviz -->  
   <node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
-
-   
+     
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find assignment2)/config/mobile_manipulator.rviz" />
 
 <arg name="markerSize"      default="0.05"/>    <!-- in m -->
