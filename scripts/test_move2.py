@@ -29,6 +29,7 @@ from armor_api.armor_utils_client import ArmorUtilsClient
 import random
 import numpy as np
 
+from ontology_interface import HandleOntology
 
 class ReadRoomCreateOntology:
 
@@ -57,14 +58,21 @@ class ReadRoomCreateOntology:
 
 		# This is used for reference when printing on screen:
 		self.LINE=150
+
+	def read_room_create_ontology(self):
+
 		print("\n============================================================\n")
 
 		self.move_to_joint_angles([0,0,0,0,0])
 
+		room_coordinates_dict={}
 		for configuration in self.configurations:
 			self.current_configuration=configuration
 			self.move_to_joint_angles(configuration)
-			self.get_room_layout_service_client()
+			room,coordinates=self.get_room_layout_service_client()
+			room_coordinates_dict[room]=coordinates
+
+		print(room_coordinates_dict)
 
 		self.old_value = self.client.query.dataprop_b2_ind('urgencyThreshold','Robot1')
 		self.old_value = self.old_value[0]
@@ -82,6 +90,8 @@ class ReadRoomCreateOntology:
 		self.client.utils.sync_buffered_reasoner()
 		print(' The new urgency threshold is : %s'%(self.client.query.dataprop_b2_ind('urgencyThreshold','Robot1')))
 		print('\n     {}\n\n'.format('-'*int(self.LINE/2)))
+
+		return room_coordinates_dict
 	
 	def add_location(self, name_of_location):
 		"""
@@ -161,8 +171,10 @@ class ReadRoomCreateOntology:
 	   		for connection in res.connections:
 	   			print("connecting location "+res.room+" with location "+connection.connected_to +" with door name "+connection.through_door)
 	   			self.connect_locations(res.room,connection.connected_to, connection.through_door)
-
 	   		print("\n============================================================\n")
+
+	   		return res.room, [res.x,res.y]
+
 	   	except rospy.ServiceException as e:
 	   		print("Service call failed: %s" % e)
 
@@ -194,4 +206,7 @@ if __name__ == '__main__':
 	rospy.init_node('joint_trajectory_publisher')
 
 	pippo=ReadRoomCreateOntology()
+	print(pippo.read_room_create_ontology())
 	
+	handle_ontology=HandleOntology()
+	print(handle_ontology.read_room_create_ontology())

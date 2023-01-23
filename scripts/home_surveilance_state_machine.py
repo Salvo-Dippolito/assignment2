@@ -29,8 +29,9 @@ from armor_api.armor_client import ArmorClient
 
 from assignment2.msg import ExecuteMoveFeedback, ExecuteMoveResult, ExecuteMoveGoal, ExecuteMoveAction
 from assignment2.msg import ChooseMoveFeedback, ChooseMoveResult, ChooseMoveGoal, ChooseMoveAction
-from assignment2.msg import ReadRoomFeedback, ReadRoomResult, ReadRoomGoal, ReadRoomAction
+
 from agent_interface import AgentState
+
 
 
 LINE=150
@@ -43,34 +44,21 @@ class Load_Map(smach.State):
     """
     def __init__(self):
 
-        smach.State.__init__(self, outcomes=['map_loaded'])
+        smach.State.__init__(self, outcomes=['map_loaded'],
+                                   output_keys=['rooms'])
+
         self.handle_ontology=HandleOntology()
 
     def execute(self, userdata):
 
         rospy.loginfo('Executing state LOAD MAP')
         
-        # self.handle_ontology.create_floor_ontology()
-        goal = ReadRoomGoal(start_reading = True)
-        self.comunicate_to_agent.read_room_client.send_goal(goal)
+        
+        userdata.rooms = self.handle_ontology.read_room_create_ontology()
+        
 
-        while not rospy.is_shutdown(): 
+        return 'map_loaded'
 
-            self.comunicate_to_agent.mutex.acquire()
-            try:
-                           
-                if  self.comunicate_to_agent.is_battery_low():
-                    print('\n')
-                    rospy.loginfo(simple_colors.magenta('Interrupting state LOAD_MAP since the battery is too low\n'))
-                    self.comunicate_to_agent.read_room_client.cancel_goals()  
-                    return 'go_charge'
-
-                if  self.comunicate_to_agent.read_room_client.is_done():
-                    return 'map_loaded'
-
-            finally:
-                
-                self.comunicate_to_agent.mutex.release()
        
         
 
@@ -119,7 +107,7 @@ class Charging(smach.State):
 class Choose_Move(smach.State):
     """
     This class launches the choose_move action server, in this state the robot chooses where to go based on what rooms are imediately reachable according to the ontology.
-    The chosen destination gets passed on to the Execute Move state through yhe state machine's userdata structure. The action server request can get preempted if the 
+    The chosen destination gets passed on to the Execute Move state through the state machine's userdata structure. The action server request can get preempted if the 
     battery state changes to low during the server's execution.
 
     """
@@ -166,13 +154,15 @@ class Execute_Move(smach.State):
 
         self.comunicate_to_agent = agent_interface
         smach.State.__init__(self, outcomes=['move_completed','go_charge'],
-                                   input_keys=['chosen_destination'])
+                                   input_keys=['chosen_destination','rooms'])
 
     def execute(self, userdata):
 
         print('[{0}]\n'.format(simple_colors.cyan('='*LINE)))
         rospy.loginfo('Executing state EXECUTE_MOVE')       
-      
+        
+        goal_coordinates=userdata.rooms[userdata.chosen_destination]
+        print("going to room "+userdata.chosen_destination+" at coordinates: "+str(goal_coordinates))
         goal = ExecuteMoveGoal(move_to=userdata.chosen_destination)        
         self.comunicate_to_agent.execute_move_client.send_goal(goal)
 

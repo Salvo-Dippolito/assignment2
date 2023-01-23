@@ -9,7 +9,7 @@
 
 .. moduleauthor:: Salvatore D'Ippolito
 
-This module holds the code for the execute_move Simple Action Server. The sever is instantiated by the class Moving2Location.
+This module holds the code for the read_room Simple Action Server. The sever is instantiated by the class Moving2Location.
 
 """
 import rospy
@@ -68,17 +68,7 @@ class ReadFromPoses:
             self._as.set_aborted()
             return
         
-
-
-            # if self._as.is_preempt_requested():
-            #     self._as.set_preempted()
-            #     success = False
-            #     return
-
-
-            
-            feedback.meters_to_destination = dist_to_location-meters_traveled
-            self._as.publish_feedback(feedback)
+        pippo=ReadRoomCreateOntology()
 
 
         if success:

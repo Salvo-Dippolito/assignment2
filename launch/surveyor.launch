@@ -2,30 +2,21 @@
 
 <launch>
     <!-- Run the architecture's component and test it based on random-based stimulus. -->
-    
-    <node pkg="armor"
-          type="execute"
-          name="armor_service" 
-          
- 
-          args="it.emarolab.armor.ARMORMainService"
-          launch-prefix= "xterm -e"
 
-    > </node>
 
 
     <node pkg = "assignment2"  
           type = "robot_state.py"
           name = "robot_state"
           output= "screen"
-          launch-prefix= "xterm -e"
+         
     > </node>
 
     <node pkg = "assignment2"  
           type = "choose_move.py"
           name = "choose_move_server"
           output = "screen"
-          launch-prefix= "xterm -e"
+          
 
     > </node>
 
@@ -33,7 +24,7 @@
           type = "execute_move.py"
           name = "execute_move_server"
           output = "screen"
-          launch-prefix= "xterm -e"
+         
    
     > </node>
 
@@ -41,7 +32,7 @@
       type = "home_surveilance_state_machine.py"
       name = "surveyor_state_machine"
       output = "screen"
-      launch-prefix= "xterm -e"
+     
 
     > </node>
 
