@@ -496,6 +496,43 @@
   <material>Gazebo/Red</material>
 </gazebo>
 
+<!--########################## HOKUYO LINK ############################################-->
+<link name="hokuyo_link">
+  <collision>
+    <origin rpy="0 0 0" xyz="0 0 0.025"/>
+    <geometry>
+      <box size="0.05 0.05 0.05"/>
+    </geometry>
+  </collision>
+  <visual>
+    <origin rpy="0 0 0" xyz="0 0 0.025"/>
+    <geometry>
+      <box size="0.05 0.05 0.05"/>
+    </geometry>
+    <material name="blue">
+      <color rgba="1 0 0 1"/>
+    </material>
+  </visual>
+  <inertial>
+    <mass value="1e-5"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+  </inertial>
+</link>
+
+<gazebo reference="hokuyo_link">
+  <material>Gazebo/Blue</material>
+</gazebo>
+
+<joint name="hokuyo_joint" type="fixed">
+  <axis xyz="0 1 0"/>
+  <origin rpy="0 0 0" xyz="0.33 0 0.15"/>
+  <parent link="base_link"/>
+  <child link="hokuyo_link"/>
+</joint>
+
+
+
 
 <!--########################## BASE TRANSMISSIONS ############################################-->
 <transmission name="front_left_wheel_trans" type="SimpleTransmission">
