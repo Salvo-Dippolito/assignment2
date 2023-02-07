@@ -18,6 +18,11 @@ find_package(catkin REQUIRED COMPONENTS
   aruco_ros
   cv_bridge
   image_transport
+
+  geometry_msgs
+  nav_msgs
+  sensor_msgs
+  tf
 )
 
 ## System dependencies are found with CMake's conventions

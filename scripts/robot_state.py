@@ -97,7 +97,7 @@ class RobotState:
                     # Publish current state of the battery:
                     publisher.publish(Bool(self._battery_low))
 
-                    self.battery_change=-self.battery_change/2
+                    self.battery_change=-self.battery_change/2000
 
                 elif self.battery_level<=0:
                   

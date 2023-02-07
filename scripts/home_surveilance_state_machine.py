@@ -163,7 +163,7 @@ class Execute_Move(smach.State):
         
         goal_coordinates=userdata.rooms[userdata.chosen_destination]
         print("going to room "+userdata.chosen_destination+" at coordinates: "+str(goal_coordinates))
-        goal = ExecuteMoveGoal(move_to=userdata.chosen_destination)        
+        goal = ExecuteMoveGoal(move_to=userdata.chosen_destination, x=goal_coordinates[0], y=goal_coordinates[1])        
         self.comunicate_to_agent.execute_move_client.send_goal(goal)
 
         while not rospy.is_shutdown(): 

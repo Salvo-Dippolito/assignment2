@@ -29,6 +29,10 @@ from armor_api.armor_manipulation_client import ArmorManipulationClient
 from armor_api.armor_query_client import ArmorQueryClient
 from armor_api.armor_utils_client import ArmorUtilsClient
 
+import actionlib
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+from actionlib_msgs.msg import GoalID
+
 
 
     
@@ -56,7 +60,45 @@ class Moving2Location:
         self._as.start()
 
         self.client = ArmorClient('surveyor_','map_ontology_')
+
+        #Setting up as a client to the move_base server:
+        self.move_client = actionlib.SimpleActionClient('move_base',MoveBaseAction)
+        rospy.loginfo("Waiting for move_base action server...")
+        wait = self.move_client.wait_for_server(rospy.Duration(5.0))
+        if not wait:
+            rospy.logerr("Action server not available!")
+            rospy.signal_shutdown("Action server not available!")
+            return
+        rospy.loginfo("Connected to move base server")
+  
+    def done_cb(self, status, result):
+
+    # This callback interprets the received goal status for the user 
+    # Reference for terminal status values: http://docs.ros.org/diamondback/api/actionlib_msgs/html/msg/GoalStatus.html
+        if status == 2:
+            print("  Received a cancel request\n")
+            
+        if status == 3:
+            print("  Goal reached!\n ")
+            
+
+        if status == 4:
+            print("  Can't reach desired target\n")
+                     
+
+        if status == 5:
+            print("  Goal rejected by action server\n")
+                    
+
+    def active_cb(self):
+        print("  we gon get there man '\n\r", flush=True)
+
+    def feedback_cb(self, feedback ):
         
+        #Uncomment this to have the feedback printed on the terminal: 
+        #print(str(feedback))
+        pass
+
 
 
     def execute_callback(self, goal):
@@ -65,29 +107,40 @@ class Moving2Location:
         feedback = ExecuteMoveFeedback()
         result = ExecuteMoveResult()
 
-        dist_to_location= uniform(0.5,4) # [m]
-        time_interval=0.1                # [s]
-        speed=0.5                        # [m/s]
+        # dist_to_location= uniform(0.5,4) # [m]
+        # time_interval=0.1                # [s]
+        # speed=0.5                        # [m/s]
         
         if goal is None :
             rospy.logerr('No execute_move goal provided! This service will be aborted!')
             self._as.set_aborted()
             return
-        
-        meters_traveled=0
-        while meters_traveled<dist_to_location :
+        # send request to movebase here:
 
-            if self._as.is_preempt_requested():
-                self._as.set_preempted()
-                success = False
-                return
 
-            #simulating movement in time:
-            rospy.sleep(time_interval)
-            meters_traveled=meters_traveled+speed*time_interval
+
+        print(goal.x)
+        print(goal.y)
+
+        self.try_goal( goal.x, goal.y)
+
+        #waiting for a result from the action server:
+        self.move_client.wait_for_result()
+
+        # meters_traveled=0
+        # while meters_traveled<dist_to_location :
+
+        #     if self._as.is_preempt_requested():
+        #         self._as.set_preempted()
+        #         success = False
+        #         return
+
+        #     #simulating movement in time:
+        #     rospy.sleep(time_interval)
+        #     meters_traveled=meters_traveled+speed*time_interval
             
-            feedback.meters_to_destination = dist_to_location-meters_traveled
-            self._as.publish_feedback(feedback)
+        #     feedback.meters_to_destination = dist_to_location-meters_traveled
+        #     self._as.publish_feedback(feedback)
 
         self.move_robot(goal.move_to)
         result.location_reached = True   
@@ -96,6 +149,18 @@ class Moving2Location:
             self._as.set_succeeded(result)
             return
 
+    def try_goal(self,goal_x,goal_y):
+
+        goal=MoveBaseGoal()
+
+        goal.target_pose.header.frame_id = 'map'
+        goal.target_pose.header.stamp = rospy.Time.now()
+        goal.target_pose.pose.position.x = goal_x
+        goal.target_pose.pose.position.y = goal_y   
+        goal.target_pose.pose.orientation.w = 1.0
+
+        self.move_client.send_goal(goal, self.done_cb, self.active_cb, self.feedback_cb)
+        
 
     def move_robot(self,new_location):
 

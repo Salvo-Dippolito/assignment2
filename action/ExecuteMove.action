@@ -4,6 +4,10 @@
 
 string move_to
 
+float32 x
+
+float32 y
+
 ---
 
 ### Action Server Result
