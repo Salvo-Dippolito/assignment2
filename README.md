@@ -32,11 +32,8 @@ used in this project's previous version. In read_room_create_ontology the arm is
 
 This is the updated project's UML diagram:
 
-<img
-    src="/images/UML.jpg"
-    title="Project UML"
-    width="75%" height="75%">
-    
+![UML (1) drawio](https://user-images.githubusercontent.com/63560239/218599063-ffe47909-6b25-4ac3-90f3-7f5ba20bb692.png)
+
 The state machine node subscribes to the robot state node through the use of an interface class called AgentState. Through an instance of this class the state machine node is also set up as a client to the two action servers /surveil_room_server and /execute_move_server. Almost all nodes (except the robot_state and the surveil_room nodes) are set up as clients to the armor service, the state machine node gets set as a client through the use of a class called HandleOntology.
 
 
