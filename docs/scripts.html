@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent Interface Module &mdash; surveilance_robot_fsm 1.5 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Documentation for a Robot Surveilance Finite State Machine" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            surveilance_robot_fsm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Agent Interface Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scripts.agent_interface.ActionClientHelper"><code class="docutils literal notranslate"><span class="pre">ActionClientHelper</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scripts.agent_interface.AgentState"><code class="docutils literal notranslate"><span class="pre">AgentState</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.agent_interface.AgentState.battery_callback"><code class="docutils literal notranslate"><span class="pre">AgentState.battery_callback()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.agent_interface.AgentState.is_battery_low"><code class="docutils literal notranslate"><span class="pre">AgentState.is_battery_low()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.agent_interface.AgentState.is_charging_point_reached"><code class="docutils literal notranslate"><span class="pre">AgentState.is_charging_point_reached()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.agent_interface.AgentState.move_base_active_cb"><code class="docutils literal notranslate"><span class="pre">AgentState.move_base_active_cb()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.agent_interface.AgentState.move_base_done_cb"><code class="docutils literal notranslate"><span class="pre">AgentState.move_base_done_cb()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.agent_interface.AgentState.move_base_feedback_cb"><code class="docutils literal notranslate"><span class="pre">AgentState.move_base_feedback_cb()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.agent_interface.AgentState.start_charge_callback"><code class="docutils literal notranslate"><span class="pre">AgentState.start_charge_callback()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-scripts.ontology_interface">Ontology Interface Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scripts.ontology_interface.ChoosingMove"><code class="docutils literal notranslate"><span class="pre">ChoosingMove</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scripts.ontology_interface.HandleOntology"><code class="docutils literal notranslate"><span class="pre">HandleOntology</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.ontology_interface.HandleOntology.add_location"><code class="docutils literal notranslate"><span class="pre">HandleOntology.add_location()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.ontology_interface.HandleOntology.connect_locations"><code class="docutils literal notranslate"><span class="pre">HandleOntology.connect_locations()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.ontology_interface.HandleOntology.create_floor_ontology"><code class="docutils literal notranslate"><span class="pre">HandleOntology.create_floor_ontology()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-scripts.robot_state">Robot State Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scripts.robot_state.RobotState"><code class="docutils literal notranslate"><span class="pre">RobotState</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.robot_state.RobotState.is_battery_low"><code class="docutils literal notranslate"><span class="pre">RobotState.is_battery_low()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-scripts.surveil_room">Surveil Room Action Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scripts.surveil_room.MovingCamera"><code class="docutils literal notranslate"><span class="pre">MovingCamera</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-scripts.execute_move">Execute Move Action Server</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scripts.execute_move.Moving2Location"><code class="docutils literal notranslate"><span class="pre">Moving2Location</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.execute_move.Moving2Location.move_robot"><code class="docutils literal notranslate"><span class="pre">Moving2Location.move_robot()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.execute_move.Moving2Location.try_goal"><code class="docutils literal notranslate"><span class="pre">Moving2Location.try_goal()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#module-scripts.home_surveilance_state_machine">Finite State Machine Module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scripts.home_surveilance_state_machine.Charging"><code class="docutils literal notranslate"><span class="pre">Charging</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.home_surveilance_state_machine.Charging.execute"><code class="docutils literal notranslate"><span class="pre">Charging.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#scripts.home_surveilance_state_machine.Choose_Move"><code class="docutils literal notranslate"><span class="pre">Choose_Move</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.home_surveilance_state_machine.Choose_Move.execute"><code class="docutils literal notranslate"><span class="pre">Choose_Move.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#scripts.home_surveilance_state_machine.Execute_Move"><code class="docutils literal notranslate"><span class="pre">Execute_Move</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.home_surveilance_state_machine.Execute_Move.execute"><code class="docutils literal notranslate"><span class="pre">Execute_Move.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#scripts.home_surveilance_state_machine.Load_Map"><code class="docutils literal notranslate"><span class="pre">Load_Map</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.home_surveilance_state_machine.Load_Map.execute"><code class="docutils literal notranslate"><span class="pre">Load_Map.execute()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#scripts.home_surveilance_state_machine.Survey_Room"><code class="docutils literal notranslate"><span class="pre">Survey_Room</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.home_surveilance_state_machine.Survey_Room.execute"><code class="docutils literal notranslate"><span class="pre">Survey_Room.execute()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">surveilance_robot_fsm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Agent Interface Module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/scripts.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="section" id="module-scripts.agent_interface">
+<span id="agent-interface-module"></span><h1>Agent Interface Module<a class="headerlink" href="#module-scripts.agent_interface" title="Permalink to this heading"></a></h1>
+<span class="target" id="module-agent_interface"></span><p>This module contains the classes called to interface the finite state machine node with the action clients and topics related
+to the robot agent moving in the armor ontology.</p>
+<p>The class ActionClientHelper has been taken as is from this repository: <a class="reference external" href="https://github.com/buoncubi/arch_skeleton">https://github.com/buoncubi/arch_skeleton</a></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.agent_interface.ActionClientHelper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.agent_interface.</span></span><span class="sig-name descname"><span class="pre">ActionClientHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">action_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">done_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feedback_callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mutex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/agent_interface.html#ActionClientHelper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.agent_interface.ActionClientHelper" title="Permalink to this definition"></a></dt>
+<dd><p>Class constructor, i.e., class initializer. Input parameters are:</p>
+<ul class="simple">
+<li><p><cite>service_name</cite>: it is the name of the server that will be invoked by this client.</p></li>
+<li><p><cite>action_type</cite>: it is the message type that the server will exchange</p></li>
+<li><p><cite>done_callback</cite>: it is the name of the function called when the action server completed its computation. If
+this parameter is not set (i.e., set to <cite>None</cite>), then only the <cite>self._done_callback</cite> function will be
+called when the server completes its computation.</p></li>
+<li><p><cite>feedback_callback</cite>: it is the name of the function called when the action server sends a feedback message. If
+this parameter is not set (i.e., set to <cite>None</cite>), then only the <cite>self._feedback_callback</cite> functions will be
+called when the server sends a feedback message.</p></li>
+<li><p><cite>mutex</cite>: it is a <cite>Lock</cite> object synchronised with the <cite>done_callback</cite> and <cite>feedback_callback</cite>. If it is not set
+(i.e., set to <cite>None</cite>), then a new mutex instance is considered. Set this variable if you want to extends the
+synchronization with other classes.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.agent_interface.AgentState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.agent_interface.</span></span><span class="sig-name descname"><span class="pre">AgentState</span></span><a class="reference internal" href="_modules/scripts/agent_interface.html#AgentState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.agent_interface.AgentState" title="Permalink to this definition"></a></dt>
+<dd><p>This class when instantiated, sets up three clients for the action servers SurveilRoom, MoveBase, and ExecuteMove.
+It also sets up as a subscriber to the battery state publisher node and the reached charging point state node.
+It makes it possible for the state machine node to retrieve information from, and give comands to, the robot.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.agent_interface.AgentState.battery_callback">
+<span class="sig-name descname"><span class="pre">battery_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/agent_interface.html#AgentState.battery_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.agent_interface.AgentState.battery_callback" title="Permalink to this definition"></a></dt>
+<dd><p>This is a subscriber callback function from the topic ‘state/battery_low’, when the battery state gets updated,
+this callback saves it in a class variable</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.agent_interface.AgentState.is_battery_low">
+<span class="sig-name descname"><span class="pre">is_battery_low</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/agent_interface.html#AgentState.is_battery_low"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.agent_interface.AgentState.is_battery_low" title="Permalink to this definition"></a></dt>
+<dd><p>This method gets called to check the robot’s battery state, it returns the value previously set by the battery_callback function</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.agent_interface.AgentState.is_charging_point_reached">
+<span class="sig-name descname"><span class="pre">is_charging_point_reached</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/agent_interface.html#AgentState.is_charging_point_reached"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.agent_interface.AgentState.is_charging_point_reached" title="Permalink to this definition"></a></dt>
+<dd><p>This method gets called to check the if the robot has reached the charging station, it returns the value previously set by the
+battery_callback function</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.agent_interface.AgentState.move_base_active_cb">
+<span class="sig-name descname"><span class="pre">move_base_active_cb</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/agent_interface.html#AgentState.move_base_active_cb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.agent_interface.AgentState.move_base_active_cb" title="Permalink to this definition"></a></dt>
+<dd><p>This callback function prints something as soon as the move_base action server is active</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.agent_interface.AgentState.move_base_done_cb">
+<span class="sig-name descname"><span class="pre">move_base_done_cb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">status</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">result</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/agent_interface.html#AgentState.move_base_done_cb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.agent_interface.AgentState.move_base_done_cb" title="Permalink to this definition"></a></dt>
+<dd><p>This callback interprets the received goal status for the user, it is kept for debugging purposes
+Reference for terminal status values: <a class="reference external" href="http://docs.ros.org/diamondback/api/actionlib_msgs/html/msg/GoalStatus.html">http://docs.ros.org/diamondback/api/actionlib_msgs/html/msg/GoalStatus.html</a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.agent_interface.AgentState.move_base_feedback_cb">
+<span class="sig-name descname"><span class="pre">move_base_feedback_cb</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">feedback</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/agent_interface.html#AgentState.move_base_feedback_cb"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.agent_interface.AgentState.move_base_feedback_cb" title="Permalink to this definition"></a></dt>
+<dd><p>This is an action server callback function from the action server ‘move_base’, it saves the current position of the robot
+in a class variable,might be useful in future versions</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.agent_interface.AgentState.start_charge_callback">
+<span class="sig-name descname"><span class="pre">start_charge_callback</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/agent_interface.html#AgentState.start_charge_callback"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.agent_interface.AgentState.start_charge_callback" title="Permalink to this definition"></a></dt>
+<dd><p>This is a subscriber callback function from the topic ‘state/reached_charging_point’, when the agent reaches room E to charge,
+this callback saves it in a class variable</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-scripts.ontology_interface">
+<span id="ontology-interface-module"></span><h1>Ontology Interface Module<a class="headerlink" href="#module-scripts.ontology_interface" title="Permalink to this heading"></a></h1>
+<span class="target" id="module-load_ontology"></span><p>This module contains the HandleOntology class, which is used to load and set up the floor ontology for the surveilance robot.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.ontology_interface.ChoosingMove">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.ontology_interface.</span></span><span class="sig-name descname"><span class="pre">ChoosingMove</span></span><a class="reference internal" href="_modules/scripts/ontology_interface.html#ChoosingMove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.ontology_interface.ChoosingMove" title="Permalink to this definition"></a></dt>
+<dd><p>This class .</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.ontology_interface.HandleOntology">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.ontology_interface.</span></span><span class="sig-name descname"><span class="pre">HandleOntology</span></span><a class="reference internal" href="_modules/scripts/ontology_interface.html#HandleOntology"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.ontology_interface.HandleOntology" title="Permalink to this definition"></a></dt>
+<dd><p>This class loads the basic ontology created for this project, where no individuals apart from the robot agent have been defined,
+but all class definitions and rules have already been set. It interacts with the user to define how many corridors constitute the floor that has to be surveiled
+and how many rooms are connected to each corridor. The user is also asked to set up the robot’s ‘urgencyThreshold’ which s a data property that specifies
+after how many seconds a room should be considered ‘urgent’ to visit.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.ontology_interface.HandleOntology.add_location">
+<span class="sig-name descname"><span class="pre">add_location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name_of_location</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/ontology_interface.html#HandleOntology.add_location"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.ontology_interface.HandleOntology.add_location" title="Permalink to this definition"></a></dt>
+<dd><p>This method is called when locations have to be added to the ontology, apart from adding a new individual of class ‘LOCATION’, it also sets the new location’s
+‘visitedAt’ data property which is needed for the reasoner to deduce which rooms should the robot prioritize.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.ontology_interface.HandleOntology.connect_locations">
+<span class="sig-name descname"><span class="pre">connect_locations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">location2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">door_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/ontology_interface.html#HandleOntology.connect_locations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.ontology_interface.HandleOntology.connect_locations" title="Permalink to this definition"></a></dt>
+<dd><p>This method can be called to join two locations in the ontology by assigning to both locations the same ‘door’ individual, which gets created explicitly for this purpose.
+The ontology’s reasoner will then deduce automatically that the two locations must be connected to each other.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.ontology_interface.HandleOntology.create_floor_ontology">
+<span class="sig-name descname"><span class="pre">create_floor_ontology</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/ontology_interface.html#HandleOntology.create_floor_ontology"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.ontology_interface.HandleOntology.create_floor_ontology" title="Permalink to this definition"></a></dt>
+<dd><p>This is the specific method that modifies the base ontology saved in the topological_map.owl file, which gets loaded by this class’s initializer.
+According to the user’s specifications new individuals of class ‘location’ will be added to represent the floor’s various rooms and corridors.
+Finally, it places the robot agent in its initial position and sets up all the needed data properties.</p>
+<p>In this version of the code, the floors that can be created by this function all follow the same general scheme: all corridors are connected to a main corridor
+denoted ‘E’ and all subsequent corridors are connected to each other. No limit has been put in place to control the number of rooms or corridor a user can add.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-scripts.robot_state">
+<span id="robot-state-module"></span><h1>Robot State Module<a class="headerlink" href="#module-scripts.robot_state" title="Permalink to this heading"></a></h1>
+<span class="target" id="module-battery_state"></span><p>This module can start different nodes that handle some aspects of the robot’s internal state. In this version of the code only a battery state notifier
+is set up.</p>
+<p>Publishes to: state/battery_low</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.robot_state.RobotState">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.robot_state.</span></span><span class="sig-name descname"><span class="pre">RobotState</span></span><a class="reference internal" href="_modules/scripts/robot_state.html#RobotState"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.robot_state.RobotState" title="Permalink to this definition"></a></dt>
+<dd><p>This class can run the code of various publishers that update the states of some internal robot functions.</p>
+<p>In this iteration of the code only the battery state publisher is implemented. It is initiated on a separate thread
+and publishes on the topic ‘state/battery_low’ where it periodically updates the state of the robot’s battery.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.robot_state.RobotState.is_battery_low">
+<span class="sig-name descname"><span class="pre">is_battery_low</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/robot_state.html#RobotState.is_battery_low"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.robot_state.RobotState.is_battery_low" title="Permalink to this definition"></a></dt>
+<dd><p>This method holds the code for the battery state publisher. It simulates a charging and discharging cycle that runs independently
+from the rest of the code and publishes on the topic /state/battery_low if the battery is charged or not.</p>
+<p>If self.random in the RobotState class initializer is set to True then it will not simulate a charging cycle and instead will
+change the state of the battery at random time intervals</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-scripts.surveil_room">
+<span id="surveil-room-action-server"></span><h1>Surveil Room Action Server<a class="headerlink" href="#module-scripts.surveil_room" title="Permalink to this heading"></a></h1>
+<span class="target" id="module-surveil_room"></span><p>This module contains the node for the action server SurveilRoom, whose code is kept in the class MovingCamera.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.surveil_room.MovingCamera">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.surveil_room.</span></span><span class="sig-name descname"><span class="pre">MovingCamera</span></span><a class="reference internal" href="_modules/scripts/surveil_room.html#MovingCamera"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.surveil_room.MovingCamera" title="Permalink to this definition"></a></dt>
+<dd><p>This class initiates the surveil_room Simple Action Server.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-scripts.execute_move">
+<span id="execute-move-action-server"></span><h1>Execute Move Action Server<a class="headerlink" href="#module-scripts.execute_move" title="Permalink to this heading"></a></h1>
+<span class="target" id="module-execute_move"></span><dl class="field-list simple">
+<dt class="field-odd">platform</dt>
+<dd class="field-odd"><p>Unix</p>
+</dd>
+<dt class="field-even">synopsis</dt>
+<dd class="field-even"><p>Pyhton module for the ExecuteMove action server</p>
+</dd>
+</dl>
+<p>This module holds the code for the execute_move Simple Action Server. The sever is instantiated by the class Moving2Location.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.execute_move.Moving2Location">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.execute_move.</span></span><span class="sig-name descname"><span class="pre">Moving2Location</span></span><a class="reference internal" href="_modules/scripts/execute_move.html#Moving2Location"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.execute_move.Moving2Location" title="Permalink to this definition"></a></dt>
+<dd><p>This class instantiates the execute_move action server. This server is tasked to move the robot both inside its ontology, and in the simulated
+environment. It receives the desired new location as a request string and returns a boolean value as a response after the actual motion of the robot
+has been completed. This server is itself a client to the move base action server.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.execute_move.Moving2Location.move_robot">
+<span class="sig-name descname"><span class="pre">move_robot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_location</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/execute_move.html#Moving2Location.move_robot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.execute_move.Moving2Location.move_robot" title="Permalink to this definition"></a></dt>
+<dd><p>This method moves the robot in its ontology. According to the rules of this ontology, this operation is comprised of three steps:
+- replacing the old value for the agent’s object property ‘isIn’ with the new desired vaue.</p>
+<ul class="simple">
+<li><p>updating the new locations’s ‘visitedAt’ data property with the current timestamp.</p></li>
+<li><p>updating the robot’s own ‘now’ data property so that the ontology can reason on the urgency of new rooms.</p></li>
+</ul>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.execute_move.Moving2Location.try_goal">
+<span class="sig-name descname"><span class="pre">try_goal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">goal_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goal_y</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/execute_move.html#Moving2Location.try_goal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.execute_move.Moving2Location.try_goal" title="Permalink to this definition"></a></dt>
+<dd><p>This method prepares the goal message for the move_base server and sends it.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-scripts.home_surveilance_state_machine">
+<span id="finite-state-machine-module"></span><h1>Finite State Machine Module<a class="headerlink" href="#module-scripts.home_surveilance_state_machine" title="Permalink to this heading"></a></h1>
+<span class="target" id="module-home_surveilance_state_machine"></span><p>This module contains the code of this simulation’s main node, the ‘surveyor_state_machine’ node. It instantiates the robot’s finite state
+machine architecture and coordinates the robot’s behaviour through the use of the AgentState class.
+The finite state machine used is built using the smach_ros architecture so all states are defined as classes, in this version of the code 5 states have
+been used to characterize the robot’s behaviour, so five classes have been made.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.home_surveilance_state_machine.Charging">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.home_surveilance_state_machine.</span></span><span class="sig-name descname"><span class="pre">Charging</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent_interface</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/home_surveilance_state_machine.html#Charging"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.home_surveilance_state_machine.Charging" title="Permalink to this definition"></a></dt>
+<dd><p>This class simulates the agent’s charging state, the finite state machine transitions to this state whenever the robot state node notifies
+that the robot is low on battery. This state also calls the execute_move action server to move the robot towards its charging station room
+before initiating the charging sequence.</p>
+<p>This class publishes on the state/reached_charging_point topic to notify the robot_state node that the robot has reached the charging point
+and can start the charging sequence.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.home_surveilance_state_machine.Charging.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/home_surveilance_state_machine.html#Charging.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.home_surveilance_state_machine.Charging.execute" title="Permalink to this definition"></a></dt>
+<dd><p>Called when executing a state.
+In the base class this raises a NotImplementedError.</p>
+<p>&#64;type ud: L{UserData} structure
+&#64;param ud: Userdata for the scope in which this state is executing</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.home_surveilance_state_machine.Choose_Move">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.home_surveilance_state_machine.</span></span><span class="sig-name descname"><span class="pre">Choose_Move</span></span><a class="reference internal" href="_modules/scripts/home_surveilance_state_machine.html#Choose_Move"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.home_surveilance_state_machine.Choose_Move" title="Permalink to this definition"></a></dt>
+<dd><p>This class instantiates the Choose Move state , in this state the robot chooses where to go based on what rooms are imediately reachable
+according to the ontology. The chosen destination gets passed on to the Execute Move state through the state machine’s userdata structure.</p>
+<p>It’s a very short state that has only one outcome that triggers the Execute Move state.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.home_surveilance_state_machine.Choose_Move.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/home_surveilance_state_machine.html#Choose_Move.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.home_surveilance_state_machine.Choose_Move.execute" title="Permalink to this definition"></a></dt>
+<dd><p>Called when executing a state.
+In the base class this raises a NotImplementedError.</p>
+<p>&#64;type ud: L{UserData} structure
+&#64;param ud: Userdata for the scope in which this state is executing</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.home_surveilance_state_machine.Execute_Move">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.home_surveilance_state_machine.</span></span><span class="sig-name descname"><span class="pre">Execute_Move</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent_interface</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/home_surveilance_state_machine.html#Execute_Move"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.home_surveilance_state_machine.Execute_Move" title="Permalink to this definition"></a></dt>
+<dd><p>This class launches the execute_move action server, in this state the robot moves to the location chosen in the Choose Move state, that has been passed through
+the userdata structure. The action server request can get preempted if the battery state changes to low during the server’s execution.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.home_surveilance_state_machine.Execute_Move.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/home_surveilance_state_machine.html#Execute_Move.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.home_surveilance_state_machine.Execute_Move.execute" title="Permalink to this definition"></a></dt>
+<dd><p>Called when executing a state.
+In the base class this raises a NotImplementedError.</p>
+<p>&#64;type ud: L{UserData} structure
+&#64;param ud: Userdata for the scope in which this state is executing</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.home_surveilance_state_machine.Load_Map">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.home_surveilance_state_machine.</span></span><span class="sig-name descname"><span class="pre">Load_Map</span></span><a class="reference internal" href="_modules/scripts/home_surveilance_state_machine.html#Load_Map"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.home_surveilance_state_machine.Load_Map" title="Permalink to this definition"></a></dt>
+<dd><p>This class handles the initial state of the robot’s state machine, where the robot’s floor ontology is built using the HandleOntology
+class defined in the ontology_interface module.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.home_surveilance_state_machine.Load_Map.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/home_surveilance_state_machine.html#Load_Map.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.home_surveilance_state_machine.Load_Map.execute" title="Permalink to this definition"></a></dt>
+<dd><p>Called when executing a state.
+In the base class this raises a NotImplementedError.</p>
+<p>&#64;type ud: L{UserData} structure
+&#64;param ud: Userdata for the scope in which this state is executing</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scripts.home_surveilance_state_machine.Survey_Room">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.home_surveilance_state_machine.</span></span><span class="sig-name descname"><span class="pre">Survey_Room</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent_interface</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/home_surveilance_state_machine.html#Survey_Room"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.home_surveilance_state_machine.Survey_Room" title="Permalink to this definition"></a></dt>
+<dd><p>This class describes the robot behaviour in the Survey Room state. In this version of the code a simple progression bar has been implemented to give an idea of the
+surveying room action’s progress, in future versions another action server will probably be used as it has been done in the Choose Move and Execute Move states.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.home_surveilance_state_machine.Survey_Room.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/home_surveilance_state_machine.html#Survey_Room.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.home_surveilance_state_machine.Survey_Room.execute" title="Permalink to this definition"></a></dt>
+<dd><p>Called when executing a state.
+In the base class this raises a NotImplementedError.</p>
+<p>&#64;type ud: L{UserData} structure
+&#64;param ud: Userdata for the scope in which this state is executing</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Documentation for a Robot Surveilance Finite State Machine" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Salvatore D&#39;Ippolito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

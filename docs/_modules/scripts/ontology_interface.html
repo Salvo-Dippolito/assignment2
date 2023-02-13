@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scripts.ontology_interface &mdash; surveilance_robot_fsm 1.5 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            surveilance_robot_fsm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html">Agent Interface Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html#module-scripts.ontology_interface">Ontology Interface Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html#module-scripts.robot_state">Robot State Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html#module-scripts.surveil_room">Surveil Room Action Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html#module-scripts.execute_move">Execute Move Action Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html#module-scripts.home_surveilance_state_machine">Finite State Machine Module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">surveilance_robot_fsm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">scripts.ontology_interface</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scripts.ontology_interface</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! /usr/bin/env python3</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">.. module:: load_ontology</span>
+<span class="sd">  :platform: Unix</span>
+<span class="sd">  :synopsis: Python module that contains the class CreateFloorOntology</span>
+
+<span class="sd">.. moduleauthor:: Salvatore D&#39;Ippolito</span>
+
+
+<span class="sd">This module contains the HandleOntology class, which is used to load and set up the floor ontology for the surveilance robot.</span>
+
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">rospy</span>
+<span class="kn">from</span> <span class="nn">std_msgs.msg</span> <span class="kn">import</span> <span class="n">Float64MultiArray</span>
+<span class="kn">from</span> <span class="nn">std_msgs.msg</span> <span class="kn">import</span> <span class="n">Time</span>
+<span class="kn">from</span> <span class="nn">std_msgs.msg</span> <span class="kn">import</span> <span class="n">Header</span>
+<span class="kn">from</span> <span class="nn">std_msgs.msg</span> <span class="kn">import</span> <span class="n">Duration</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">trajectory_msgs.msg</span> <span class="kn">import</span> <span class="n">JointTrajectory</span>
+<span class="kn">from</span> <span class="nn">trajectory_msgs.msg</span> <span class="kn">import</span> <span class="n">JointTrajectoryPoint</span>
+
+<span class="kn">from</span> <span class="nn">std_srvs.srv</span> <span class="kn">import</span> <span class="n">Trigger</span><span class="p">,</span> <span class="n">TriggerRequest</span><span class="p">,</span> <span class="n">TriggerResponse</span>
+<span class="kn">from</span> <span class="nn">assignment2.srv</span> <span class="kn">import</span> <span class="n">RoomInformation</span><span class="p">,</span> <span class="n">RoomInformationRequest</span><span class="p">,</span> <span class="n">RoomInformationResponse</span>
+
+
+<span class="c1"># Import the armor client class</span>
+<span class="kn">from</span> <span class="nn">armor_api.armor_client</span> <span class="kn">import</span> <span class="n">ArmorClient</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">realpath</span>
+<span class="kn">from</span> <span class="nn">armor_msgs.srv</span> <span class="kn">import</span> <span class="n">ArmorDirective</span><span class="p">,</span> <span class="n">ArmorDirectiveList</span><span class="p">,</span> <span class="n">ArmorDirectiveListRequest</span>
+<span class="kn">from</span> <span class="nn">armor_msgs.msg</span> <span class="kn">import</span> <span class="n">_ArmorDirectiveReq</span>
+<span class="kn">from</span> <span class="nn">armor_api.armor_manipulation_client</span> <span class="kn">import</span> <span class="n">ArmorManipulationClient</span>
+<span class="kn">from</span> <span class="nn">armor_api.armor_query_client</span> <span class="kn">import</span> <span class="n">ArmorQueryClient</span>
+<span class="kn">from</span> <span class="nn">armor_api.armor_utils_client</span> <span class="kn">import</span> <span class="n">ArmorUtilsClient</span>
+
+
+<span class="kn">import</span> <span class="nn">random</span>
+
+
+
+<div class="viewcode-block" id="HandleOntology"><a class="viewcode-back" href="../../scripts.html#scripts.ontology_interface.HandleOntology">[docs]</a><span class="k">class</span> <span class="nc">HandleOntology</span><span class="p">():</span>
+<span class="w">	</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">	This class loads the basic ontology created for this project, where no individuals apart from the robot agent have been defined, </span>
+<span class="sd">	but all class definitions and rules have already been set. It interacts with the user to define how many corridors constitute the floor that has to be surveiled</span>
+<span class="sd">	and how many rooms are connected to each corridor. The user is also asked to set up the robot&#39;s &#39;urgencyThreshold&#39; which s a data property that specifies </span>
+<span class="sd">	after how many seconds a room should be considered &#39;urgent&#39; to visit. </span>
+<span class="sd">	&quot;&quot;&quot;</span>
+
+	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+		<span class="c1"># publish on the arm topic to control it</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">pub</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Publisher</span><span class="p">(</span><span class="s1">&#39;/arm_controller/command&#39;</span><span class="p">,</span> <span class="n">JointTrajectory</span><span class="p">,</span> <span class="n">queue_size</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+		<span class="c1"># set up a client to the ontology server</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">ArmorClient</span><span class="p">(</span><span class="s1">&#39;surveyor_&#39;</span><span class="p">,</span><span class="s1">&#39;map_ontology_&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">locations_list</span><span class="o">=</span><span class="p">[]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">doors_list</span><span class="o">=</span><span class="p">[]</span>
+		
+		<span class="c1"># load basic ontology</span>
+		<span class="n">path</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">(</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39;/../ontologies/topological_map.owl&#39;</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">load_ref_from_file</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;http://bnc/exp-rob-lab/2022-23&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;PELLET&#39;</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">mount_on_ref</span><span class="p">()</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">configurations</span><span class="o">=</span><span class="p">[</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.8</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mf">0.8</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.5</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mf">0.8</span><span class="p">],[</span><span class="o">-</span><span class="mf">1.37</span><span class="p">,</span><span class="mf">0.8</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">],[</span><span class="mf">1.35</span><span class="p">,</span><span class="mf">1.7</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mf">0.8</span><span class="p">],[</span><span class="mf">3.2</span><span class="p">,</span><span class="mf">0.1</span><span class="p">,</span><span class="o">-</span><span class="mf">0.2</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">],[</span><span class="mi">3</span><span class="p">,</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.4</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mf">0.3</span><span class="p">],[</span><span class="mf">0.55</span><span class="p">,</span><span class="mf">1.7</span><span class="p">,</span><span class="o">-</span><span class="mf">0.4</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mf">0.8</span><span class="p">]]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">current_configuration</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+
+
+		<span class="c1"># This is used for reference when printing on screen:</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">LINE</span><span class="o">=</span><span class="mi">50</span>
+
+	<span class="k">def</span> <span class="nf">read_room_create_ontology</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">============================================================</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">move_to_joint_angles</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+		<span class="n">room_coordinates_dict</span><span class="o">=</span><span class="p">{}</span>
+		<span class="k">for</span> <span class="n">configuration</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">configurations</span><span class="p">:</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">current_configuration</span><span class="o">=</span><span class="n">configuration</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">move_to_joint_angles</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span>
+			<span class="n">room</span><span class="p">,</span><span class="n">coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_room_layout_service_client</span><span class="p">()</span>
+			<span class="n">room_coordinates_dict</span><span class="p">[</span><span class="n">room</span><span class="p">]</span><span class="o">=</span><span class="n">coordinates</span>
+
+		<span class="nb">print</span><span class="p">(</span><span class="n">room_coordinates_dict</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">old_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">dataprop_b2_ind</span><span class="p">(</span><span class="s1">&#39;urgencyThreshold&#39;</span><span class="p">,</span><span class="s1">&#39;Robot1&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">old_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">old_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_value</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">11</span><span class="p">]</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">move_to_joint_angles</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">move_to_joint_angles</span><span class="p">([</span><span class="o">-</span><span class="mf">1.57</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.57</span><span class="p">,</span> <span class="mf">1.57</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;     </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LINE</span><span class="o">/</span><span class="mi">2</span><span class="p">)))</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> Defining an urgency threshold for all rooms</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39; The default urgency threshold is: &#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">old_value</span><span class="o">+</span><span class="s1">&#39; seconds</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">urgency_threshold</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_number_of</span><span class="p">(</span><span class="s1">&#39;seconds that pass before a room becomes urgent&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">replace_dataprop_b2_ind</span><span class="p">(</span> <span class="s1">&#39;urgencyThreshold&#39;</span><span class="p">,</span> <span class="s1">&#39;Robot1&#39;</span><span class="p">,</span> <span class="s1">&#39;Long&#39;</span> <span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">urgency_threshold</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">old_value</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">add_objectprop_to_ind</span><span class="p">(</span><span class="s1">&#39;isIn&#39;</span><span class="p">,</span> <span class="s1">&#39;Robot1&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">disjoin_all_inds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">doors_list</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">disjoin_all_inds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locations_list</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">apply_buffered_changes</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">sync_buffered_reasoner</span><span class="p">()</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39; The new urgency threshold is : </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">dataprop_b2_ind</span><span class="p">(</span><span class="s1">&#39;urgencyThreshold&#39;</span><span class="p">,</span><span class="s1">&#39;Robot1&#39;</span><span class="p">)))</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">     </span><span class="si">{}</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LINE</span><span class="o">/</span><span class="mi">2</span><span class="p">)))</span>
+
+		<span class="k">return</span> <span class="n">room_coordinates_dict</span>
+	
+
+<div class="viewcode-block" id="HandleOntology.create_floor_ontology"><a class="viewcode-back" href="../../scripts.html#scripts.ontology_interface.HandleOntology.create_floor_ontology">[docs]</a>	<span class="k">def</span> <span class="nf">create_floor_ontology</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		This is the specific method that modifies the base ontology saved in the topological_map.owl file, which gets loaded by this class&#39;s initializer. </span>
+<span class="sd">		According to the user&#39;s specifications new individuals of class &#39;location&#39; will be added to represent the floor&#39;s various rooms and corridors.</span>
+<span class="sd">		Finally, it places the robot agent in its initial position and sets up all the needed data properties.</span>
+
+<span class="sd">		In this version of the code, the floors that can be created by this function all follow the same general scheme: all corridors are connected to a main corridor </span>
+<span class="sd">		denoted &#39;E&#39; and all subsequent corridors are connected to each other. No limit has been put in place to control the number of rooms or corridor a user can add.</span>
+<span class="sd">		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">add_location</span><span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
+		<span class="n">n</span><span class="o">=</span><span class="n">k</span><span class="o">=</span><span class="mi">1</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+		<span class="n">number_of_corridors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_number_of</span><span class="p">(</span><span class="s1">&#39;corridors&#39;</span><span class="p">)</span>
+		
+		<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">number_of_corridors</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+
+			<span class="n">corridor_name</span> <span class="o">=</span> <span class="s1">&#39;C&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">add_location</span><span class="p">(</span><span class="n">corridor_name</span><span class="p">)</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+			<span class="n">rooms_per_corridor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_number_of</span><span class="p">(</span><span class="s1">&#39;rooms for this corridor&#39;</span><span class="p">)</span>
+			
+			<span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">rooms_per_corridor</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+				
+				<span class="n">room_name</span> <span class="o">=</span> <span class="s1">&#39;R&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">add_location</span><span class="p">(</span><span class="n">room_name</span><span class="p">)</span>
+				<span class="n">door_name</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">connect_locations</span><span class="p">(</span><span class="n">room_name</span><span class="p">,</span><span class="n">corridor_name</span><span class="p">,</span><span class="n">door_name</span><span class="p">)</span>
+				<span class="n">n</span><span class="o">=</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span>
+				
+			<span class="k">if</span> <span class="n">i</span><span class="o">&lt;</span><span class="n">number_of_corridors</span><span class="p">:</span>
+
+				<span class="c1">#CONNECT CORRIDORS TOGETHER IF THERE ARE MORE THAN ONE </span>
+				<span class="n">door_name</span> <span class="o">=</span> <span class="s1">&#39;d&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+				<span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span>
+				<span class="n">next_corridor_name</span><span class="o">=</span><span class="s1">&#39;C&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">connect_locations</span><span class="p">(</span><span class="n">corridor_name</span><span class="p">,</span><span class="n">next_corridor_name</span><span class="p">,</span><span class="n">door_name</span><span class="p">)</span>
+
+			<span class="n">door_name</span> <span class="o">=</span> <span class="s1">&#39;d&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+			<span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span>
+			<span class="bp">self</span><span class="o">.</span><span class="n">connect_locations</span><span class="p">(</span><span class="n">corridor_name</span><span class="p">,</span><span class="s1">&#39;E&#39;</span><span class="p">,</span><span class="n">door_name</span><span class="p">)</span>
+
+		<span class="c1"># INITIALIZING ROBOT PROPERTIES</span>
+		
+		<span class="n">old_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">dataprop_b2_ind</span><span class="p">(</span><span class="s1">&#39;urgencyThreshold&#39;</span><span class="p">,</span><span class="s1">&#39;Robot1&#39;</span><span class="p">)</span>
+		<span class="n">old_value</span> <span class="o">=</span> <span class="n">old_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+		<span class="n">old_value</span> <span class="o">=</span> <span class="n">old_value</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">11</span><span class="p">]</span>
+
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;     </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LINE</span><span class="o">/</span><span class="mi">2</span><span class="p">)))</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> Defining an urgency threshold for all rooms</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39; The default urgency threshold is: &#39;</span><span class="o">+</span><span class="n">old_value</span><span class="o">+</span><span class="s1">&#39; seconds</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>		
+		<span class="n">urgency_threshold</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_number_of</span><span class="p">(</span><span class="s1">&#39;seconds that pass before a room becomes urgent&#39;</span><span class="p">)</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">replace_dataprop_b2_ind</span><span class="p">(</span> <span class="s1">&#39;urgencyThreshold&#39;</span><span class="p">,</span> <span class="s1">&#39;Robot1&#39;</span><span class="p">,</span> <span class="s1">&#39;Long&#39;</span> <span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">urgency_threshold</span><span class="p">),</span> <span class="n">old_value</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">add_objectprop_to_ind</span><span class="p">(</span><span class="s1">&#39;isIn&#39;</span><span class="p">,</span> <span class="s1">&#39;Robot1&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">disjoin_all_inds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">doors_list</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">disjoin_all_inds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">locations_list</span><span class="p">)</span>
+
+		
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">apply_buffered_changes</span><span class="p">()</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">sync_buffered_reasoner</span><span class="p">()</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39; The new urgency threshold is : </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">dataprop_b2_ind</span><span class="p">(</span><span class="s1">&#39;urgencyThreshold&#39;</span><span class="p">,</span><span class="s1">&#39;Robot1&#39;</span><span class="p">)))</span>
+
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">     </span><span class="si">{}</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LINE</span><span class="o">/</span><span class="mi">2</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="HandleOntology.add_location"><a class="viewcode-back" href="../../scripts.html#scripts.ontology_interface.HandleOntology.add_location">[docs]</a>	<span class="k">def</span> <span class="nf">add_location</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name_of_location</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		This method is called when locations have to be added to the ontology, apart from adding a new individual of class &#39;LOCATION&#39;, it also sets the new location&#39;s </span>
+<span class="sd">		&#39;visitedAt&#39; data property which is needed for the reasoner to deduce which rooms should the robot prioritize. </span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="c1">#Initializing to a zero timestamp all new locations</span>
+		<span class="n">start_time</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">add_ind_to_class</span><span class="p">(</span><span class="n">name_of_location</span><span class="p">,</span> <span class="s1">&#39;LOCATION&#39;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Added individual </span><span class="si">%s</span><span class="s1"> of type LOCATION&#39;</span> <span class="o">%</span><span class="n">name_of_location</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">locations_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name_of_location</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">add_dataprop_to_ind</span><span class="p">(</span><span class="s1">&#39;visitedAt&#39;</span><span class="p">,</span><span class="n">name_of_location</span><span class="p">,</span><span class="s1">&#39;Long&#39;</span><span class="p">,</span><span class="n">start_time</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HandleOntology.connect_locations"><a class="viewcode-back" href="../../scripts.html#scripts.ontology_interface.HandleOntology.connect_locations">[docs]</a>	<span class="k">def</span> <span class="nf">connect_locations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">location1</span><span class="p">,</span><span class="n">location2</span><span class="p">,</span><span class="n">door_name</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		This method can be called to join two locations in the ontology by assigning to both locations the same &#39;door&#39; individual, which gets created explicitly for this purpose.</span>
+<span class="sd">		The ontology&#39;s reasoner will then deduce automatically that the two locations must be connected to each other.</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">add_ind_to_class</span><span class="p">(</span><span class="n">door_name</span><span class="p">,</span> <span class="s1">&#39;DOOR&#39;</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">doors_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">door_name</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Added individual </span><span class="si">%s</span><span class="s1"> of type DOOR&#39;</span> <span class="o">%</span><span class="n">door_name</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">add_objectprop_to_ind</span><span class="p">(</span><span class="s1">&#39;hasDoor&#39;</span><span class="p">,</span> <span class="n">location1</span><span class="p">,</span> <span class="n">door_name</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">manipulation</span><span class="o">.</span><span class="n">add_objectprop_to_ind</span><span class="p">(</span><span class="s1">&#39;hasDoor&#39;</span><span class="p">,</span> <span class="n">location2</span><span class="p">,</span> <span class="n">door_name</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Connected </span><span class="si">%s</span><span class="s1"> and </span><span class="si">%s</span><span class="s1"> with door </span><span class="si">%s</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">location1</span><span class="p">,</span> <span class="n">location2</span><span class="p">,</span> <span class="n">door_name</span><span class="p">))</span></div>
+		
+
+	<span class="k">def</span> <span class="nf">get_number_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">what</span><span class="p">):</span>
+		<span class="n">x</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
+		<span class="n">not_an_int</span> <span class="o">=</span> <span class="kc">True</span>
+		<span class="k">while</span><span class="p">(</span><span class="n">not_an_int</span><span class="p">):</span>
+			<span class="n">x</span><span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Enter the number of </span><span class="si">%s</span><span class="s1">: &#39;</span> <span class="o">%</span><span class="n">what</span><span class="p">)</span>
+			<span class="k">try</span><span class="p">:</span>
+				<span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+			<span class="k">except</span><span class="p">:</span>
+				<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> Please enter a valid integer&#39;</span><span class="p">)</span>
+			<span class="k">else</span><span class="p">:</span>
+				<span class="n">not_an_int</span><span class="o">=</span><span class="kc">False</span>
+		<span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">marker_id_service_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+		<span class="n">rospy</span><span class="o">.</span><span class="n">wait_for_service</span><span class="p">(</span><span class="s1">&#39;/get_marker_id&#39;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;marker_id_ok&quot;</span><span class="p">)</span>
+		<span class="k">try</span><span class="p">:</span>
+			<span class="n">service_handle</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceProxy</span><span class="p">(</span><span class="s1">&#39;/get_marker_id&#39;</span><span class="p">,</span> <span class="n">Trigger</span><span class="p">)</span>
+			<span class="n">req</span> <span class="o">=</span> <span class="n">TriggerRequest</span><span class="p">()</span>
+			<span class="n">res</span> <span class="o">=</span> <span class="n">service_handle</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+
+			<span class="k">while</span> <span class="ow">not</span> <span class="n">res</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
+
+				<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;couldn&#39;t read marker, giggling the arm a bit&quot;</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">giggle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_configuration</span><span class="p">)</span>
+				<span class="n">res</span> <span class="o">=</span> <span class="n">service_handle</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+			
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;read marker id: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">message</span><span class="p">))</span>
+			<span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">message</span>
+		<span class="k">except</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Service call failed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">get_room_layout_service_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+	   	<span class="n">rospy</span><span class="o">.</span><span class="n">wait_for_service</span><span class="p">(</span><span class="s1">&#39;/room_info&#39;</span><span class="p">)</span>
+	   	<span class="c1"># rospy.wait_for_service(&#39;/armor_interface_srv&#39;)</span>
+	   	<span class="c1">#print(&quot;room info ok&quot;)</span>
+	   	<span class="k">try</span><span class="p">:</span>
+	   		<span class="n">service_handle</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceProxy</span><span class="p">(</span><span class="s1">&#39;/room_info&#39;</span><span class="p">,</span> <span class="n">RoomInformation</span><span class="p">)</span>
+
+	   		<span class="n">req</span><span class="o">=</span> <span class="n">RoomInformationRequest</span><span class="p">()</span>
+	   		<span class="n">req</span><span class="o">.</span><span class="n">id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">marker_id_service_client</span><span class="p">())</span>
+	   		<span class="n">res</span> <span class="o">=</span> <span class="n">service_handle</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+	   		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;adding location &quot;</span><span class="o">+</span><span class="n">res</span><span class="o">.</span><span class="n">room</span><span class="p">)</span>
+	   		<span class="bp">self</span><span class="o">.</span><span class="n">add_location</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">room</span><span class="p">)</span>
+
+	   		<span class="k">for</span> <span class="n">connection</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">connections</span><span class="p">:</span>
+	   			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;connecting location &quot;</span><span class="o">+</span><span class="n">res</span><span class="o">.</span><span class="n">room</span><span class="o">+</span><span class="s2">&quot; with location &quot;</span><span class="o">+</span><span class="n">connection</span><span class="o">.</span><span class="n">connected_to</span> <span class="o">+</span><span class="s2">&quot; with door name &quot;</span><span class="o">+</span><span class="n">connection</span><span class="o">.</span><span class="n">through_door</span><span class="p">)</span>
+	   			<span class="bp">self</span><span class="o">.</span><span class="n">connect_locations</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">room</span><span class="p">,</span><span class="n">connection</span><span class="o">.</span><span class="n">connected_to</span><span class="p">,</span> <span class="n">connection</span><span class="o">.</span><span class="n">through_door</span><span class="p">)</span>
+	   		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">============================================================</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+	   		<span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">room</span><span class="p">,</span> <span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">res</span><span class="o">.</span><span class="n">y</span><span class="p">]</span>
+
+	   	<span class="k">except</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+	   		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Service call failed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+	<span class="k">def</span> <span class="nf">move_to_joint_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+		<span class="c1">#print(&quot;1&quot;)</span>
+		<span class="n">msg</span> <span class="o">=</span> <span class="n">JointTrajectory</span><span class="p">()</span>
+		<span class="c1">#print(&quot;2&quot;)</span>
+		<span class="n">msg</span><span class="o">.</span><span class="n">joint_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;arm_base_joint&quot;</span><span class="p">,</span><span class="s2">&quot;shoulder_joint&quot;</span><span class="p">,</span> <span class="s2">&quot;bottom_wrist_joint&quot;</span><span class="p">,</span> <span class="s2">&quot;elbow_joint&quot;</span><span class="p">,</span><span class="s2">&quot;top_wrist_joint&quot;</span><span class="p">]</span>
+		<span class="n">point</span> <span class="o">=</span> <span class="n">JointTrajectoryPoint</span><span class="p">()</span>
+		<span class="c1">#print(&quot;3&quot;)</span>
+		<span class="n">point</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">c</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">c</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span>
+		<span class="c1">#print(point.positions)</span>
+		<span class="n">point</span><span class="o">.</span><span class="n">time_from_start</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Duration</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+		<span class="n">msg</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">stamp</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Time</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+		<span class="n">msg</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+		<span class="c1">#print(&quot;4&quot;)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">pub</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+		<span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+		<span class="c1">#print(msg)</span>
+		
+
+	<span class="k">def</span> <span class="nf">giggle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">old_configuration</span><span class="p">):</span>
+		
+		<span class="n">new_config</span><span class="o">=</span> <span class="n">old_configuration</span><span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+		<span class="bp">self</span><span class="o">.</span><span class="n">move_to_joint_angles</span><span class="p">(</span> <span class="n">new_config</span><span class="p">)</span>
+		<span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;moved to &quot;</span><span class="p">)</span>
+		<span class="nb">print</span><span class="p">(</span><span class="n">new_config</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ChoosingMove"><a class="viewcode-back" href="../../scripts.html#scripts.ontology_interface.ChoosingMove">[docs]</a><span class="k">class</span> <span class="nc">ChoosingMove</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class . </span>
+<span class="sd">    </span>
+<span class="sd">    </span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># # Instantiate and start the action server based on the `SimpleActionServer` class.</span>
+        <span class="c1"># self._as = SimpleActionServer(&#39;choose_move&#39;,</span>
+        <span class="c1">#                               assignment2.msg.ChooseMoveAction,</span>
+        <span class="c1">#                               execute_cb=self.execute_callback,</span>
+        <span class="c1">#                               auto_start=False)</span>
+        <span class="c1"># self._as.start()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">ArmorClient</span><span class="p">(</span><span class="s1">&#39;surveyor_&#39;</span><span class="p">,</span><span class="s1">&#39;map_ontology_&#39;</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">clean_room_strings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">room_list</span><span class="p">):</span>
+
+        <span class="n">clean_room_strings</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">room_string</span> <span class="ow">in</span> <span class="n">room_list</span><span class="p">:</span>
+            <span class="n">room_string</span><span class="o">=</span><span class="n">room_string</span><span class="p">[</span><span class="mi">32</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">clean_room_strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">room_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">clean_room_strings</span>  
+
+    <span class="k">def</span> <span class="nf">classify_rooms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">room_list</span><span class="p">):</span>
+        <span class="n">corridors</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">urgent_rooms</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">non_urgent_rooms</span><span class="o">=</span><span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">room</span> <span class="ow">in</span> <span class="n">room_list</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">check_if_ind_b2_class</span><span class="p">(</span><span class="n">room</span><span class="p">,</span><span class="s1">&#39;CORRIDOR&#39;</span><span class="p">):</span>
+                <span class="n">corridors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">room</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">check_if_ind_b2_class</span><span class="p">(</span><span class="n">room</span><span class="p">,</span><span class="s1">&#39;URGENT&#39;</span><span class="p">):</span>
+                <span class="n">urgent_rooms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">room</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">non_urgent_rooms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">room</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">urgent_rooms</span><span class="p">,</span> <span class="n">non_urgent_rooms</span><span class="p">,</span> <span class="n">corridors</span> 
+
+    <span class="k">def</span> <span class="nf">chose_room</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="c1"># success = True</span>
+        <span class="c1"># feedback = ChooseMoveFeedback()</span>
+        <span class="c1"># result = ChooseMoveResult()</span>
+
+        <span class="c1"># if goal is None :</span>
+        <span class="c1">#     rospy.logerr(&#39;No choose_move goal provided! This service will be aborted!&#39;)</span>
+        <span class="c1">#     self._as.set_aborted()</span>
+        <span class="c1">#     return</span>
+        
+        <span class="c1"># if self._as.is_preempt_requested():</span>
+        <span class="c1">#         self._as.set_preempted()</span>
+        <span class="c1">#         success = False</span>
+        <span class="c1">#         return</span>
+
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">apply_buffered_changes</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">sync_buffered_reasoner</span><span class="p">()</span>
+        <span class="n">reachable_rooms</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">objectprop_b2_ind</span><span class="p">(</span><span class="s1">&#39;canReach&#39;</span><span class="p">,</span><span class="s1">&#39;Robot1&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> Reachable rooms are: &#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clean_room_strings</span><span class="p">(</span><span class="n">reachable_rooms</span><span class="p">))</span>
+        
+        <span class="n">urgent_rooms</span><span class="p">,</span> <span class="n">non_urgent_rooms</span><span class="p">,</span> <span class="n">corridors</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">classify_rooms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">clean_room_strings</span><span class="p">(</span><span class="n">reachable_rooms</span><span class="p">))</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Urgent rooms: &#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">urgent_rooms</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Non urgent rooms: &#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">non_urgent_rooms</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Corridors: &#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">corridors</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">urgent_rooms</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">corridors</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">non_urgent_rooms</span><span class="p">:</span>
+                <span class="n">go_to</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">non_urgent_rooms</span><span class="o">+</span><span class="n">corridors</span><span class="p">)</span>
+                
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="k">if</span> <span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">60</span><span class="p">):</span>
+                    <span class="n">go_to</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">non_urgent_rooms</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">go_to</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">corridors</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">go_to</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">urgent_rooms</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">go_to</span></div>
+
+
+        <span class="c1"># if self._as.is_preempt_requested():</span>
+        <span class="c1">#         self._as.set_preempted()</span>
+        <span class="c1">#         success = False</span>
+        <span class="c1">#         return</span>
+        
+        <span class="c1"># if success:</span>
+        <span class="c1">#     print(&#39;\n Surveyor will move to location %s \n&#39; %go_to)</span>
+        <span class="c1">#     result.chosen_room = go_to</span>
+        <span class="c1">#     self._as.set_succeeded(result)</span>
+        <span class="c1">#     return</span>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Salvatore D&#39;Ippolito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
