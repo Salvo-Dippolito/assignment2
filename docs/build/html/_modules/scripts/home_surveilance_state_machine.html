@@ -264,23 +264,23 @@
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">comunicate_to_agent</span><span class="o">.</span><span class="n">mutex</span><span class="o">.</span><span class="n">release</span><span class="p">()</span></div></div>
 
-<div class="viewcode-block" id="Survey_Room"><a class="viewcode-back" href="../../scripts.html#scripts.home_surveilance_state_machine.Survey_Room">[docs]</a><span class="k">class</span> <span class="nc">Survey_Room</span><span class="p">(</span><span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="p">):</span>
+<div class="viewcode-block" id="Surveil_Room"><a class="viewcode-back" href="../../scripts.html#scripts.home_surveilance_state_machine.Surveil_Room">[docs]</a><span class="k">class</span> <span class="nc">Surveil_Room</span><span class="p">(</span><span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This class describes the robot behaviour in the Survey Room state. In this version of the code a simple progression bar has been implemented to give an idea of the</span>
-<span class="sd">    surveying room action&#39;s progress, in future versions another action server will probably be used as it has been done in the Choose Move and Execute Move states.</span>
+<span class="sd">    This class describes the robot behaviour in the Surveil Room state. In this version of the code a simple progression bar has been implemented to give an idea of the</span>
+<span class="sd">    surveiling room action&#39;s progress, in future versions another action server will probably be used as it has been done in the Choose Move and Execute Move states.</span>
 <span class="sd">    </span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">agent_interface</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">comunicate_to_agent</span> <span class="o">=</span> <span class="n">agent_interface</span>
-        <span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcomes</span><span class="o">=</span> <span class="p">[</span><span class="s1">&#39;room_surveyed&#39;</span><span class="p">,</span><span class="s1">&#39;go_charge&#39;</span><span class="p">])</span>
+        <span class="n">smach</span><span class="o">.</span><span class="n">State</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outcomes</span><span class="o">=</span> <span class="p">[</span><span class="s1">&#39;room_surveilled&#39;</span><span class="p">,</span><span class="s1">&#39;go_charge&#39;</span><span class="p">])</span>
 
-<div class="viewcode-block" id="Survey_Room.execute"><a class="viewcode-back" href="../../scripts.html#scripts.home_surveilance_state_machine.Survey_Room.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">userdata</span><span class="p">):</span>
+<div class="viewcode-block" id="Surveil_Room.execute"><a class="viewcode-back" href="../../scripts.html#scripts.home_surveilance_state_machine.Surveil_Room.execute">[docs]</a>    <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">userdata</span><span class="p">):</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;[</span><span class="si">{0}</span><span class="s1">]</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">simple_colors</span><span class="o">.</span><span class="n">cyan</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="o">*</span><span class="n">LINE</span><span class="p">)))</span>
-        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s1">&#39;Executing state SURVEY_ROOM&#39;</span><span class="p">)</span>
+        <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="s1">&#39;Executing state SURVEIL_ROOM&#39;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">delay</span><span class="o">=</span><span class="mf">0.1</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">survey_time</span><span class="o">=</span><span class="mi">5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">surveil_time</span><span class="o">=</span><span class="mi">50</span>
         <span class="n">time_passed</span><span class="o">=</span><span class="mi">0</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">goal</span> <span class="o">=</span> <span class="n">SurveilRoomGoal</span><span class="p">(</span><span class="n">start</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
@@ -288,20 +288,20 @@
 
         <span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">()</span> <span class="p">:</span>
 
-            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1"> Surveyling room: [</span><span class="si">{0}{1}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">simple_colors</span><span class="o">.</span><span class="n">blue</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="mi">20</span><span class="o">*</span><span class="n">time_passed</span><span class="p">)),</span><span class="s1">&#39;_&#39;</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="mi">20</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">survey_time</span><span class="o">-</span><span class="n">time_passed</span><span class="p">))),</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1"> Surveilling room: [</span><span class="si">{0}{1}</span><span class="s1">]&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">simple_colors</span><span class="o">.</span><span class="n">blue</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">time_passed</span><span class="p">)),</span><span class="s1">&#39;_&#39;</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">surveil_time</span><span class="o">-</span><span class="n">time_passed</span><span class="p">))),</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
 
             <span class="k">if</span>  <span class="bp">self</span><span class="o">.</span><span class="n">comunicate_to_agent</span><span class="o">.</span><span class="n">is_battery_low</span><span class="p">():</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-                <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">simple_colors</span><span class="o">.</span><span class="n">magenta</span><span class="p">(</span><span class="s1">&#39;Interrupting state SURVEY_ROOM since the battery is too low</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="p">)</span>
+                <span class="n">rospy</span><span class="o">.</span><span class="n">loginfo</span><span class="p">(</span><span class="n">simple_colors</span><span class="o">.</span><span class="n">magenta</span><span class="p">(</span><span class="s1">&#39;Interrupting state SURVEIL_ROOM since the battery is too low</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span> <span class="p">)</span>
                 <span class="k">return</span> <span class="s1">&#39;go_charge&#39;</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">comunicate_to_agent</span><span class="o">.</span><span class="n">surveil_room_client</span><span class="o">.</span><span class="n">is_done</span><span class="p">():</span>
                 
-                <span class="k">return</span> <span class="s1">&#39;room_surveyed&#39;</span>
+                <span class="k">return</span> <span class="s1">&#39;room_surveilled&#39;</span>
            
 
             <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delay</span><span class="p">)</span>
-            <span class="n">time_passed</span><span class="o">=</span><span class="p">(</span><span class="n">time_passed</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">delay</span><span class="p">)</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">survey_time</span></div></div>
+            <span class="n">time_passed</span><span class="o">=</span><span class="p">(</span><span class="n">time_passed</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">delay</span><span class="p">)</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">surveil_time</span></div></div>
             
 
 
@@ -331,14 +331,14 @@
 
         <span class="n">smach</span><span class="o">.</span><span class="n">StateMachine</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;EXECUTE_MOVE&#39;</span><span class="p">,</span> <span class="n">Execute_Move</span><span class="p">(</span><span class="n">agent_interface</span><span class="p">),</span> 
                                <span class="n">transitions</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;go_charge&#39;</span><span class="p">:</span><span class="s1">&#39;CHARGING&#39;</span><span class="p">,</span>
-                                            <span class="s1">&#39;move_completed&#39;</span><span class="p">:</span><span class="s1">&#39;SURVEY_ROOM&#39;</span><span class="p">})</span>
+                                            <span class="s1">&#39;move_completed&#39;</span><span class="p">:</span><span class="s1">&#39;SURVEIL_ROOM&#39;</span><span class="p">})</span>
 
         <span class="n">smach</span><span class="o">.</span><span class="n">StateMachine</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;CHOOSE_MOVE&#39;</span><span class="p">,</span> <span class="n">Choose_Move</span><span class="p">(),</span> 
                                <span class="n">transitions</span><span class="o">=</span><span class="p">{</span> <span class="s1">&#39;move_chosen&#39;</span><span class="p">:</span><span class="s1">&#39;EXECUTE_MOVE&#39;</span><span class="p">})</span>
 
-        <span class="n">smach</span><span class="o">.</span><span class="n">StateMachine</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;SURVEY_ROOM&#39;</span><span class="p">,</span> <span class="n">Survey_Room</span><span class="p">(</span><span class="n">agent_interface</span><span class="p">),</span> 
+        <span class="n">smach</span><span class="o">.</span><span class="n">StateMachine</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;SURVEIL_ROOM&#39;</span><span class="p">,</span> <span class="n">Surveil_Room</span><span class="p">(</span><span class="n">agent_interface</span><span class="p">),</span> 
                                <span class="n">transitions</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;go_charge&#39;</span><span class="p">:</span><span class="s1">&#39;CHARGING&#39;</span><span class="p">,</span>
-                                            <span class="s1">&#39;room_surveyed&#39;</span><span class="p">:</span><span class="s1">&#39;CHOOSE_MOVE&#39;</span><span class="p">})</span>
+                                            <span class="s1">&#39;room_surveilled&#39;</span><span class="p">:</span><span class="s1">&#39;CHOOSE_MOVE&#39;</span><span class="p">})</span>
 
     <span class="n">sis</span> <span class="o">=</span> <span class="n">smach_ros</span><span class="o">.</span><span class="n">IntrospectionServer</span><span class="p">(</span><span class="s1">&#39;server_name&#39;</span><span class="p">,</span> <span class="n">sm</span><span class="p">,</span> <span class="s1">&#39;/SM_ROOT&#39;</span><span class="p">)</span>
     <span class="n">sis</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>

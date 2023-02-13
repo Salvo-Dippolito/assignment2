@@ -152,15 +152,31 @@
 		<span class="c1"># This is used for reference when printing on screen:</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">LINE</span><span class="o">=</span><span class="mi">50</span>
 
-	<span class="k">def</span> <span class="nf">read_room_create_ontology</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HandleOntology.read_room_create_ontology"><a class="viewcode-back" href="../../scripts.html#scripts.ontology_interface.HandleOntology.read_room_create_ontology">[docs]</a>	<span class="k">def</span> <span class="nf">read_room_create_ontology</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		This is the specific method that modifies the base ontology saved in the topological_map.owl file, which gets loaded by this class&#39;s initializer. </span>
+
+
+<span class="sd">		In this version of the code, the floors that can be created by this function all follow the same general scheme: all corridors are connected to a main corridor </span>
+<span class="sd">		denoted &#39;E&#39; and all subsequent corridors are connected to each other. No limit has been put in place to control the number of rooms or corridor a user can add.</span>
+<span class="sd">		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
 
 		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">============================================================</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
 
+		<span class="c1"># Go to home position</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">move_to_joint_angles</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+		
+		<span class="c1"># set up room coordinates dictionary</span>
 		<span class="n">room_coordinates_dict</span><span class="o">=</span><span class="p">{}</span>
+
+		<span class="c1"># go through each pose and update the room coordinates dictionary</span>
 		<span class="k">for</span> <span class="n">configuration</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">configurations</span><span class="p">:</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">current_configuration</span><span class="o">=</span><span class="n">configuration</span>
 			<span class="bp">self</span><span class="o">.</span><span class="n">move_to_joint_angles</span><span class="p">(</span><span class="n">configuration</span><span class="p">)</span>
+
+			<span class="c1"># call server to process image and retrieve room info</span>
 			<span class="n">room</span><span class="p">,</span><span class="n">coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">get_room_layout_service_client</span><span class="p">()</span>
 			<span class="n">room_coordinates_dict</span><span class="p">[</span><span class="n">room</span><span class="p">]</span><span class="o">=</span><span class="n">coordinates</span>
 
@@ -185,7 +201,7 @@
 		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39; The new urgency threshold is : </span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">dataprop_b2_ind</span><span class="p">(</span><span class="s1">&#39;urgencyThreshold&#39;</span><span class="p">,</span><span class="s1">&#39;Robot1&#39;</span><span class="p">)))</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">     </span><span class="si">{}</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">LINE</span><span class="o">/</span><span class="mi">2</span><span class="p">)))</span>
 
-		<span class="k">return</span> <span class="n">room_coordinates_dict</span>
+		<span class="k">return</span> <span class="n">room_coordinates_dict</span></div>
 	
 
 <div class="viewcode-block" id="HandleOntology.create_floor_ontology"><a class="viewcode-back" href="../../scripts.html#scripts.ontology_interface.HandleOntology.create_floor_ontology">[docs]</a>	<span class="k">def</span> <span class="nf">create_floor_ontology</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -283,7 +299,12 @@
 		<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Connected </span><span class="si">%s</span><span class="s1"> and </span><span class="si">%s</span><span class="s1"> with door </span><span class="si">%s</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">location1</span><span class="p">,</span> <span class="n">location2</span><span class="p">,</span> <span class="n">door_name</span><span class="p">))</span></div>
 		
 
-	<span class="k">def</span> <span class="nf">get_number_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">what</span><span class="p">):</span>
+<div class="viewcode-block" id="HandleOntology.get_number_of"><a class="viewcode-back" href="../../scripts.html#scripts.ontology_interface.HandleOntology.get_number_of">[docs]</a>	<span class="k">def</span> <span class="nf">get_number_of</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">what</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Simple method to get a valid number from the user</span>
+<span class="sd">		</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="n">x</span><span class="o">=</span><span class="s1">&#39;&#39;</span>
 		<span class="n">not_an_int</span> <span class="o">=</span> <span class="kc">True</span>
 		<span class="k">while</span><span class="p">(</span><span class="n">not_an_int</span><span class="p">):</span>
@@ -294,9 +315,16 @@
 				<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> Please enter a valid integer&#39;</span><span class="p">)</span>
 			<span class="k">else</span><span class="p">:</span>
 				<span class="n">not_an_int</span><span class="o">=</span><span class="kc">False</span>
-		<span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+		<span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 
-	<span class="k">def</span> <span class="nf">marker_id_service_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="HandleOntology.marker_id_service_client"><a class="viewcode-back" href="../../scripts.html#scripts.ontology_interface.HandleOntology.marker_id_service_client">[docs]</a>	<span class="k">def</span> <span class="nf">marker_id_service_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		This object sends a trigger request to the marker_service_id server. This server processes an incoming raw image message</span>
+<span class="sd">		so that it can detect a valid marker id and return it as a response to the client. If the server couldn&#39;t send a valid </span>
+<span class="sd">		marker id, then this client moves the arm a bit and tries sending the request again.</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="n">rospy</span><span class="o">.</span><span class="n">wait_for_service</span><span class="p">(</span><span class="s1">&#39;/get_marker_id&#39;</span><span class="p">)</span>
 		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;marker_id_ok&quot;</span><span class="p">)</span>
 		<span class="k">try</span><span class="p">:</span>
@@ -306,82 +334,98 @@
 
 			<span class="k">while</span> <span class="ow">not</span> <span class="n">res</span><span class="o">.</span><span class="n">success</span><span class="p">:</span>
 
-				<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;couldn&#39;t read marker, giggling the arm a bit&quot;</span><span class="p">)</span>
-				<span class="bp">self</span><span class="o">.</span><span class="n">giggle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_configuration</span><span class="p">)</span>
+				<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;couldn&#39;t read marker, jiggling the arm a bit&quot;</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">jiggle</span><span class="p">(</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_configuration</span><span class="p">)</span>
 				<span class="n">res</span> <span class="o">=</span> <span class="n">service_handle</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
 			
 			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;read marker id: &quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">message</span><span class="p">))</span>
 			<span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">message</span>
 		<span class="k">except</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
 
-			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Service call failed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Service call failed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span></div>
 
-	<span class="k">def</span> <span class="nf">get_room_layout_service_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-	   	<span class="n">rospy</span><span class="o">.</span><span class="n">wait_for_service</span><span class="p">(</span><span class="s1">&#39;/room_info&#39;</span><span class="p">)</span>
-	   	<span class="c1"># rospy.wait_for_service(&#39;/armor_interface_srv&#39;)</span>
-	   	<span class="c1">#print(&quot;room info ok&quot;)</span>
-	   	<span class="k">try</span><span class="p">:</span>
-	   		<span class="n">service_handle</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceProxy</span><span class="p">(</span><span class="s1">&#39;/room_info&#39;</span><span class="p">,</span> <span class="n">RoomInformation</span><span class="p">)</span>
+<div class="viewcode-block" id="HandleOntology.get_room_layout_service_client"><a class="viewcode-back" href="../../scripts.html#scripts.ontology_interface.HandleOntology.get_room_layout_service_client">[docs]</a>	<span class="k">def</span> <span class="nf">get_room_layout_service_client</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		This object calls the /room_info server to get all the room info linked to the marker that has been detected by the marker_service_id server.</span>
+<span class="sd">		The room and all its connections are then added as individuals to the ontology file and room name and coordinates are returned.</span>
 
-	   		<span class="n">req</span><span class="o">=</span> <span class="n">RoomInformationRequest</span><span class="p">()</span>
-	   		<span class="n">req</span><span class="o">.</span><span class="n">id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">marker_id_service_client</span><span class="p">())</span>
-	   		<span class="n">res</span> <span class="o">=</span> <span class="n">service_handle</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
-	   		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;adding location &quot;</span><span class="o">+</span><span class="n">res</span><span class="o">.</span><span class="n">room</span><span class="p">)</span>
-	   		<span class="bp">self</span><span class="o">.</span><span class="n">add_location</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">room</span><span class="p">)</span>
+<span class="sd">		&quot;&quot;&quot;</span>
+		<span class="n">rospy</span><span class="o">.</span><span class="n">wait_for_service</span><span class="p">(</span><span class="s1">&#39;/room_info&#39;</span><span class="p">)</span>
+		<span class="k">try</span><span class="p">:</span>
 
-	   		<span class="k">for</span> <span class="n">connection</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">connections</span><span class="p">:</span>
-	   			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;connecting location &quot;</span><span class="o">+</span><span class="n">res</span><span class="o">.</span><span class="n">room</span><span class="o">+</span><span class="s2">&quot; with location &quot;</span><span class="o">+</span><span class="n">connection</span><span class="o">.</span><span class="n">connected_to</span> <span class="o">+</span><span class="s2">&quot; with door name &quot;</span><span class="o">+</span><span class="n">connection</span><span class="o">.</span><span class="n">through_door</span><span class="p">)</span>
-	   			<span class="bp">self</span><span class="o">.</span><span class="n">connect_locations</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">room</span><span class="p">,</span><span class="n">connection</span><span class="o">.</span><span class="n">connected_to</span><span class="p">,</span> <span class="n">connection</span><span class="o">.</span><span class="n">through_door</span><span class="p">)</span>
-	   		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">============================================================</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+			<span class="n">service_handle</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceProxy</span><span class="p">(</span><span class="s1">&#39;/room_info&#39;</span><span class="p">,</span> <span class="n">RoomInformation</span><span class="p">)</span>
 
-	   		<span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">room</span><span class="p">,</span> <span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">res</span><span class="o">.</span><span class="n">y</span><span class="p">]</span>
+			<span class="n">req</span><span class="o">=</span> <span class="n">RoomInformationRequest</span><span class="p">()</span>
 
-	   	<span class="k">except</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-	   		<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Service call failed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+			<span class="c1"># send the marker id found from the other server</span>
+			<span class="n">req</span><span class="o">.</span><span class="n">id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">marker_id_service_client</span><span class="p">())</span>
+			<span class="n">res</span> <span class="o">=</span> <span class="n">service_handle</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+			<span class="c1"># add room to ontology</span>
 
-	<span class="k">def</span> <span class="nf">move_to_joint_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
-		<span class="c1">#print(&quot;1&quot;)</span>
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;adding location &quot;</span><span class="o">+</span><span class="n">res</span><span class="o">.</span><span class="n">room</span><span class="p">)</span>
+
+			<span class="bp">self</span><span class="o">.</span><span class="n">add_location</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">room</span><span class="p">)</span>
+
+			<span class="c1"># add all the connections to the room</span>
+			<span class="k">for</span> <span class="n">connection</span> <span class="ow">in</span> <span class="n">res</span><span class="o">.</span><span class="n">connections</span><span class="p">:</span>
+				<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;connecting location &quot;</span><span class="o">+</span><span class="n">res</span><span class="o">.</span><span class="n">room</span><span class="o">+</span><span class="s2">&quot; with location &quot;</span><span class="o">+</span><span class="n">connection</span><span class="o">.</span><span class="n">connected_to</span> <span class="o">+</span><span class="s2">&quot; with door name &quot;</span><span class="o">+</span><span class="n">connection</span><span class="o">.</span><span class="n">through_door</span><span class="p">)</span>
+				<span class="bp">self</span><span class="o">.</span><span class="n">connect_locations</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">room</span><span class="p">,</span><span class="n">connection</span><span class="o">.</span><span class="n">connected_to</span><span class="p">,</span> <span class="n">connection</span><span class="o">.</span><span class="n">through_door</span><span class="p">)</span>
+				<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">============================================================</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+				<span class="c1"># return new room name and coordinates</span>
+
+			<span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">room</span><span class="p">,</span> <span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">x</span><span class="p">,</span><span class="n">res</span><span class="o">.</span><span class="n">y</span><span class="p">]</span>
+
+		<span class="k">except</span> <span class="n">rospy</span><span class="o">.</span><span class="n">ServiceException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+
+			<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Service call failed: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="HandleOntology.move_to_joint_angles"><a class="viewcode-back" href="../../scripts.html#scripts.ontology_interface.HandleOntology.move_to_joint_angles">[docs]</a>	<span class="k">def</span> <span class="nf">move_to_joint_angles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">c</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Object built to move the robot&#39;s arm to a desired configuration. </span>
+<span class="sd">		It publishes on the topic /arm_controller/command.</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
+
 		<span class="n">msg</span> <span class="o">=</span> <span class="n">JointTrajectory</span><span class="p">()</span>
-		<span class="c1">#print(&quot;2&quot;)</span>
+		
 		<span class="n">msg</span><span class="o">.</span><span class="n">joint_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;arm_base_joint&quot;</span><span class="p">,</span><span class="s2">&quot;shoulder_joint&quot;</span><span class="p">,</span> <span class="s2">&quot;bottom_wrist_joint&quot;</span><span class="p">,</span> <span class="s2">&quot;elbow_joint&quot;</span><span class="p">,</span><span class="s2">&quot;top_wrist_joint&quot;</span><span class="p">]</span>
 		<span class="n">point</span> <span class="o">=</span> <span class="n">JointTrajectoryPoint</span><span class="p">()</span>
-		<span class="c1">#print(&quot;3&quot;)</span>
+		
 		<span class="n">point</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">c</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">c</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span><span class="n">c</span><span class="p">[</span><span class="mi">4</span><span class="p">]]</span>
-		<span class="c1">#print(point.positions)</span>
+		
 		<span class="n">point</span><span class="o">.</span><span class="n">time_from_start</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Duration</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 		<span class="n">msg</span><span class="o">.</span><span class="n">header</span><span class="o">.</span><span class="n">stamp</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Time</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
 		<span class="n">msg</span><span class="o">.</span><span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
-		<span class="c1">#print(&quot;4&quot;)</span>
+		
 		<span class="bp">self</span><span class="o">.</span><span class="n">pub</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
-		<span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-		<span class="c1">#print(msg)</span>
+		<span class="n">rospy</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div>
+		
 		
 
-	<span class="k">def</span> <span class="nf">giggle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">old_configuration</span><span class="p">):</span>
+<div class="viewcode-block" id="HandleOntology.jiggle"><a class="viewcode-back" href="../../scripts.html#scripts.ontology_interface.HandleOntology.jiggle">[docs]</a>	<span class="k">def</span> <span class="nf">jiggle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">old_configuration</span><span class="p">):</span>
+<span class="w">		</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">		Function to move the arm a bit around a given configuration. Used to slightly change the</span>
+<span class="sd">		camera&#39;s orientation when it&#39;s not able to read an ARUCO marker.</span>
+
+<span class="sd">		&quot;&quot;&quot;</span>
 		
 		<span class="n">new_config</span><span class="o">=</span> <span class="n">old_configuration</span><span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
 		<span class="bp">self</span><span class="o">.</span><span class="n">move_to_joint_angles</span><span class="p">(</span> <span class="n">new_config</span><span class="p">)</span>
 		<span class="nb">print</span> <span class="p">(</span><span class="s2">&quot;moved to &quot;</span><span class="p">)</span>
-		<span class="nb">print</span><span class="p">(</span><span class="n">new_config</span><span class="p">)</span></div>
+		<span class="nb">print</span><span class="p">(</span><span class="n">new_config</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ChoosingMove"><a class="viewcode-back" href="../../scripts.html#scripts.ontology_interface.ChoosingMove">[docs]</a><span class="k">class</span> <span class="nc">ChoosingMove</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    This class . </span>
+<span class="sd">    This class was also used in the ChooseMove action server, it executes the server&#39;s code. </span>
+<span class="sd">   	It&#39;s placed in this node along with other classes that have to interact with the ontology.</span>
+<span class="sd">    It&#39;s a client to the armor server and chooses in which room the robot should move to after asking for a list of all reachable rooms.</span>
 <span class="sd">    </span>
-<span class="sd">    </span>
-
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="c1"># # Instantiate and start the action server based on the `SimpleActionServer` class.</span>
-        <span class="c1"># self._as = SimpleActionServer(&#39;choose_move&#39;,</span>
-        <span class="c1">#                               assignment2.msg.ChooseMoveAction,</span>
-        <span class="c1">#                               execute_cb=self.execute_callback,</span>
-        <span class="c1">#                               auto_start=False)</span>
-        <span class="c1"># self._as.start()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span> <span class="o">=</span> <span class="n">ArmorClient</span><span class="p">(</span><span class="s1">&#39;surveyor_&#39;</span><span class="p">,</span><span class="s1">&#39;map_ontology_&#39;</span><span class="p">)</span>
     
@@ -410,21 +454,6 @@
         <span class="k">return</span> <span class="n">urgent_rooms</span><span class="p">,</span> <span class="n">non_urgent_rooms</span><span class="p">,</span> <span class="n">corridors</span> 
 
     <span class="k">def</span> <span class="nf">chose_room</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-
-        <span class="c1"># success = True</span>
-        <span class="c1"># feedback = ChooseMoveFeedback()</span>
-        <span class="c1"># result = ChooseMoveResult()</span>
-
-        <span class="c1"># if goal is None :</span>
-        <span class="c1">#     rospy.logerr(&#39;No choose_move goal provided! This service will be aborted!&#39;)</span>
-        <span class="c1">#     self._as.set_aborted()</span>
-        <span class="c1">#     return</span>
-        
-        <span class="c1"># if self._as.is_preempt_requested():</span>
-        <span class="c1">#         self._as.set_preempted()</span>
-        <span class="c1">#         success = False</span>
-        <span class="c1">#         return</span>
-
 
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">apply_buffered_changes</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">sync_buffered_reasoner</span><span class="p">()</span>
@@ -459,17 +488,6 @@
 
         <span class="k">return</span> <span class="n">go_to</span></div>
 
-
-        <span class="c1"># if self._as.is_preempt_requested():</span>
-        <span class="c1">#         self._as.set_preempted()</span>
-        <span class="c1">#         success = False</span>
-        <span class="c1">#         return</span>
-        
-        <span class="c1"># if success:</span>
-        <span class="c1">#     print(&#39;\n Surveyor will move to location %s \n&#39; %go_to)</span>
-        <span class="c1">#     result.chosen_room = go_to</span>
-        <span class="c1">#     self._as.set_succeeded(result)</span>
-        <span class="c1">#     return</span>
 
 </pre></div>
 

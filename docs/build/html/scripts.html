@@ -64,6 +64,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#scripts.ontology_interface.HandleOntology.add_location"><code class="docutils literal notranslate"><span class="pre">HandleOntology.add_location()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#scripts.ontology_interface.HandleOntology.connect_locations"><code class="docutils literal notranslate"><span class="pre">HandleOntology.connect_locations()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#scripts.ontology_interface.HandleOntology.create_floor_ontology"><code class="docutils literal notranslate"><span class="pre">HandleOntology.create_floor_ontology()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.ontology_interface.HandleOntology.get_number_of"><code class="docutils literal notranslate"><span class="pre">HandleOntology.get_number_of()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.ontology_interface.HandleOntology.get_room_layout_service_client"><code class="docutils literal notranslate"><span class="pre">HandleOntology.get_room_layout_service_client()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.ontology_interface.HandleOntology.jiggle"><code class="docutils literal notranslate"><span class="pre">HandleOntology.jiggle()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.ontology_interface.HandleOntology.marker_id_service_client"><code class="docutils literal notranslate"><span class="pre">HandleOntology.marker_id_service_client()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.ontology_interface.HandleOntology.move_to_joint_angles"><code class="docutils literal notranslate"><span class="pre">HandleOntology.move_to_joint_angles()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.ontology_interface.HandleOntology.read_room_create_ontology"><code class="docutils literal notranslate"><span class="pre">HandleOntology.read_room_create_ontology()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -104,8 +110,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#scripts.home_surveilance_state_machine.Load_Map.execute"><code class="docutils literal notranslate"><span class="pre">Load_Map.execute()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#scripts.home_surveilance_state_machine.Survey_Room"><code class="docutils literal notranslate"><span class="pre">Survey_Room</span></code></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#scripts.home_surveilance_state_machine.Survey_Room.execute"><code class="docutils literal notranslate"><span class="pre">Survey_Room.execute()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#scripts.home_surveilance_state_machine.Surveil_Room"><code class="docutils literal notranslate"><span class="pre">Surveil_Room</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scripts.home_surveilance_state_machine.Surveil_Room.execute"><code class="docutils literal notranslate"><span class="pre">Surveil_Room.execute()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -222,7 +228,11 @@ this callback saves it in a class variable</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scripts.ontology_interface.ChoosingMove">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.ontology_interface.</span></span><span class="sig-name descname"><span class="pre">ChoosingMove</span></span><a class="reference internal" href="_modules/scripts/ontology_interface.html#ChoosingMove"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.ontology_interface.ChoosingMove" title="Permalink to this definition"></a></dt>
-<dd><p>This class .</p>
+<dd><dl class="simple">
+<dt>This class was also used in the ChooseMove action server, it executes the server’s code.</dt><dd><p>It’s placed in this node along with other classes that have to interact with the ontology.</p>
+</dd>
+</dl>
+<p>It’s a client to the armor server and chooses in which room the robot should move to after asking for a list of all reachable rooms.</p>
 </dd></dl>
 
 <dl class="py class">
@@ -252,6 +262,49 @@ The ontology’s reasoner will then deduce automatically that the two locations 
 <dd><p>This is the specific method that modifies the base ontology saved in the topological_map.owl file, which gets loaded by this class’s initializer.
 According to the user’s specifications new individuals of class ‘location’ will be added to represent the floor’s various rooms and corridors.
 Finally, it places the robot agent in its initial position and sets up all the needed data properties.</p>
+<p>In this version of the code, the floors that can be created by this function all follow the same general scheme: all corridors are connected to a main corridor
+denoted ‘E’ and all subsequent corridors are connected to each other. No limit has been put in place to control the number of rooms or corridor a user can add.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.ontology_interface.HandleOntology.get_number_of">
+<span class="sig-name descname"><span class="pre">get_number_of</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">what</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/ontology_interface.html#HandleOntology.get_number_of"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.ontology_interface.HandleOntology.get_number_of" title="Permalink to this definition"></a></dt>
+<dd><p>Simple method to get a valid number from the user</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.ontology_interface.HandleOntology.get_room_layout_service_client">
+<span class="sig-name descname"><span class="pre">get_room_layout_service_client</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/ontology_interface.html#HandleOntology.get_room_layout_service_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.ontology_interface.HandleOntology.get_room_layout_service_client" title="Permalink to this definition"></a></dt>
+<dd><p>This object calls the /room_info server to get all the room info linked to the marker that has been detected by the marker_service_id server.
+The room and all its connections are then added as individuals to the ontology file and room name and coordinates are returned.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.ontology_interface.HandleOntology.jiggle">
+<span class="sig-name descname"><span class="pre">jiggle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">old_configuration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/ontology_interface.html#HandleOntology.jiggle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.ontology_interface.HandleOntology.jiggle" title="Permalink to this definition"></a></dt>
+<dd><p>Function to move the arm a bit around a given configuration. Used to slightly change the
+camera’s orientation when it’s not able to read an ARUCO marker.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.ontology_interface.HandleOntology.marker_id_service_client">
+<span class="sig-name descname"><span class="pre">marker_id_service_client</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/ontology_interface.html#HandleOntology.marker_id_service_client"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.ontology_interface.HandleOntology.marker_id_service_client" title="Permalink to this definition"></a></dt>
+<dd><p>This object sends a trigger request to the marker_service_id server. This server processes an incoming raw image message
+so that it can detect a valid marker id and return it as a response to the client. If the server couldn’t send a valid
+marker id, then this client moves the arm a bit and tries sending the request again.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.ontology_interface.HandleOntology.move_to_joint_angles">
+<span class="sig-name descname"><span class="pre">move_to_joint_angles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">c</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/ontology_interface.html#HandleOntology.move_to_joint_angles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.ontology_interface.HandleOntology.move_to_joint_angles" title="Permalink to this definition"></a></dt>
+<dd><p>Object built to move the robot’s arm to a desired configuration.
+It publishes on the topic /arm_controller/command.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scripts.ontology_interface.HandleOntology.read_room_create_ontology">
+<span class="sig-name descname"><span class="pre">read_room_create_ontology</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/ontology_interface.html#HandleOntology.read_room_create_ontology"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.ontology_interface.HandleOntology.read_room_create_ontology" title="Permalink to this definition"></a></dt>
+<dd><p>This is the specific method that modifies the base ontology saved in the topological_map.owl file, which gets loaded by this class’s initializer.</p>
 <p>In this version of the code, the floors that can be created by this function all follow the same general scheme: all corridors are connected to a main corridor
 denoted ‘E’ and all subsequent corridors are connected to each other. No limit has been put in place to control the number of rooms or corridor a user can add.</p>
 </dd></dl>
@@ -288,7 +341,8 @@ change the state of the battery at random time intervals</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="scripts.surveil_room.MovingCamera">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.surveil_room.</span></span><span class="sig-name descname"><span class="pre">MovingCamera</span></span><a class="reference internal" href="_modules/scripts/surveil_room.html#MovingCamera"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.surveil_room.MovingCamera" title="Permalink to this definition"></a></dt>
-<dd><p>This class initiates the surveil_room Simple Action Server.</p>
+<dd><p>This class initiates the surveil_room Simple Action Server. This server simply moves the fourth joint in the arm so that the camera can rotate
+and scan the room.</p>
 </dd></dl>
 
 </div>
@@ -404,13 +458,13 @@ In the base class this raises a NotImplementedError.</p>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="scripts.home_surveilance_state_machine.Survey_Room">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.home_surveilance_state_machine.</span></span><span class="sig-name descname"><span class="pre">Survey_Room</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent_interface</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/home_surveilance_state_machine.html#Survey_Room"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.home_surveilance_state_machine.Survey_Room" title="Permalink to this definition"></a></dt>
-<dd><p>This class describes the robot behaviour in the Survey Room state. In this version of the code a simple progression bar has been implemented to give an idea of the
-surveying room action’s progress, in future versions another action server will probably be used as it has been done in the Choose Move and Execute Move states.</p>
+<dt class="sig sig-object py" id="scripts.home_surveilance_state_machine.Surveil_Room">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scripts.home_surveilance_state_machine.</span></span><span class="sig-name descname"><span class="pre">Surveil_Room</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">agent_interface</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/home_surveilance_state_machine.html#Surveil_Room"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.home_surveilance_state_machine.Surveil_Room" title="Permalink to this definition"></a></dt>
+<dd><p>This class describes the robot behaviour in the Surveil Room state. In this version of the code a simple progression bar has been implemented to give an idea of the
+surveiling room action’s progress, in future versions another action server will probably be used as it has been done in the Choose Move and Execute Move states.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="scripts.home_surveilance_state_machine.Survey_Room.execute">
-<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/home_surveilance_state_machine.html#Survey_Room.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.home_surveilance_state_machine.Survey_Room.execute" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="scripts.home_surveilance_state_machine.Surveil_Room.execute">
+<span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">userdata</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scripts/home_surveilance_state_machine.html#Surveil_Room.execute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scripts.home_surveilance_state_machine.Surveil_Room.execute" title="Permalink to this definition"></a></dt>
 <dd><p>Called when executing a state.
 In the base class this raises a NotImplementedError.</p>
 <p>&#64;type ud: L{UserData} structure

@@ -36,17 +36,12 @@ from assignment2.msg import SurveilRoomFeedback, SurveilRoomResult
 import assignment2  
 
 
-from armor_api.armor_client import ArmorClient
-from armor_api.armor_manipulation_client import ArmorManipulationClient
-from armor_api.armor_query_client import ArmorQueryClient
-from armor_api.armor_utils_client import ArmorUtilsClient
-
-
 
 class MovingCamera(object):
 
     """
-    This class initiates the surveil_room Simple Action Server. 
+    This class initiates the surveil_room Simple Action Server. This server simply moves the fourth joint in the arm so that the camera can rotate 
+    and scan the room. 
     
     
 
@@ -60,8 +55,6 @@ class MovingCamera(object):
                                       execute_cb=self.execute_callback,
                                       auto_start=False)
         self._as.start()
-
-        self.client = ArmorClient('surveyor_','map_ontology_')
 
         self.pub = rospy.Publisher('/arm_controller/command', JointTrajectory, queue_size=10)
     
@@ -77,17 +70,15 @@ class MovingCamera(object):
             self._as.set_aborted()
             return
         
-        
-
-        if self._as.is_preempt_requested():
-                self._as.set_preempted()
-                success = False
-                return
         joint_angle = -3.14
 
         while joint_angle < 3.14:
             self.move_to_joint_angles([-1.57, -1.57, 1.57, joint_angle, 0])
             joint_angle += 0.628
+            if self._as.is_preempt_requested():
+                self._as.set_preempted()
+                success = False
+                return
         
         self.move_to_joint_angles([-1.57, -1.57, 1.57, 0, 0])
         

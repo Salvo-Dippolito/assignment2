@@ -76,13 +76,29 @@ class HandleOntology():
 
 	def read_room_create_ontology(self):
 
+		"""
+		This is the specific method that modifies the base ontology saved in the topological_map.owl file, which gets loaded by this class's initializer. 
+
+
+		In this version of the code, the floors that can be created by this function all follow the same general scheme: all corridors are connected to a main corridor 
+		denoted 'E' and all subsequent corridors are connected to each other. No limit has been put in place to control the number of rooms or corridor a user can add.
+		
+		"""
+
 		print("\n============================================================\n")
 
+		# Go to home position
 		self.move_to_joint_angles([0,0,0,0,0])
+		
+		# set up room coordinates dictionary
 		room_coordinates_dict={}
+
+		# go through each pose and update the room coordinates dictionary
 		for configuration in self.configurations:
 			self.current_configuration=configuration
 			self.move_to_joint_angles(configuration)
+
+			# call server to process image and retrieve room info
 			room,coordinates=self.get_room_layout_service_client()
 			room_coordinates_dict[room]=coordinates
 
@@ -206,6 +222,11 @@ class HandleOntology():
 		
 
 	def get_number_of(self,what):
+		"""
+		Simple method to get a valid number from the user
+		
+		"""
+
 		x=''
 		not_an_int = True
 		while(not_an_int):
@@ -219,6 +240,13 @@ class HandleOntology():
 		return int(x)
 
 	def marker_id_service_client(self):
+		"""
+		This object sends a trigger request to the marker_service_id server. This server processes an incoming raw image message
+		so that it can detect a valid marker id and return it as a response to the client. If the server couldn't send a valid 
+		marker id, then this client moves the arm a bit and tries sending the request again.
+
+		"""
+
 		rospy.wait_for_service('/get_marker_id')
 		print("marker_id_ok")
 		try:
@@ -228,8 +256,8 @@ class HandleOntology():
 
 			while not res.success:
 
-				print("couldn't read marker, giggling the arm a bit")
-				self.giggle( self.current_configuration)
+				print("couldn't read marker, jiggling the arm a bit")
+				self.jiggle( self.current_configuration)
 				res = service_handle(req)
 			
 			print("read marker id: "+str(res.message))
@@ -239,47 +267,70 @@ class HandleOntology():
 			print("Service call failed: %s" % e)
 
 	def get_room_layout_service_client(self):
-	   	rospy.wait_for_service('/room_info')
-	   	# rospy.wait_for_service('/armor_interface_srv')
-	   	#print("room info ok")
-	   	try:
-	   		service_handle = rospy.ServiceProxy('/room_info', RoomInformation)
+		"""
+		This object calls the /room_info server to get all the room info linked to the marker that has been detected by the marker_service_id server.
+		The room and all its connections are then added as individuals to the ontology file and room name and coordinates are returned.
 
-	   		req= RoomInformationRequest()
-	   		req.id=int(self.marker_id_service_client())
-	   		res = service_handle(req)
-	   		print("adding location "+res.room)
-	   		self.add_location(res.room)
+		"""
+		rospy.wait_for_service('/room_info')
+		try:
 
-	   		for connection in res.connections:
-	   			print("connecting location "+res.room+" with location "+connection.connected_to +" with door name "+connection.through_door)
-	   			self.connect_locations(res.room,connection.connected_to, connection.through_door)
-	   		print("\n============================================================\n")
+			service_handle = rospy.ServiceProxy('/room_info', RoomInformation)
 
-	   		return res.room, [res.x,res.y]
+			req= RoomInformationRequest()
 
-	   	except rospy.ServiceException as e:
-	   		print("Service call failed: %s" % e)
+			# send the marker id found from the other server
+			req.id=int(self.marker_id_service_client())
+			res = service_handle(req)
+			# add room to ontology
+
+			print("adding location "+res.room)
+
+			self.add_location(res.room)
+
+			# add all the connections to the room
+			for connection in res.connections:
+				print("connecting location "+res.room+" with location "+connection.connected_to +" with door name "+connection.through_door)
+				self.connect_locations(res.room,connection.connected_to, connection.through_door)
+				print("\n============================================================\n")
+
+				# return new room name and coordinates
+
+			return res.room, [res.x,res.y]
+
+		except rospy.ServiceException as e:
+
+			print("Service call failed: %s" % e)
 
 	def move_to_joint_angles(self,c):
-		#print("1")
+		"""
+		Object built to move the robot's arm to a desired configuration. 
+		It publishes on the topic /arm_controller/command.
+
+		"""
+
 		msg = JointTrajectory()
-		#print("2")
+		
 		msg.joint_names = ["arm_base_joint","shoulder_joint", "bottom_wrist_joint", "elbow_joint","top_wrist_joint"]
 		point = JointTrajectoryPoint()
-		#print("3")
+		
 		point.positions = [c[0],c[1],c[2],c[3],c[4]]
-		#print(point.positions)
+		
 		point.time_from_start = rospy.Duration(1)
 		msg.header.stamp = rospy.Time.now()
 		msg.points.append(point)
-		#print("4")
+		
 		self.pub.publish(msg)
 		rospy.sleep(2)
-		#print(msg)
+		
 		
 
-	def giggle(self,old_configuration):
+	def jiggle(self,old_configuration):
+		"""
+		Function to move the arm a bit around a given configuration. Used to slightly change the
+		camera's orientation when it's not able to read an ARUCO marker.
+
+		"""
 		
 		new_config= old_configuration+ np.random.uniform(-0.1, 0.1, 5)
 		self.move_to_joint_angles( new_config)
@@ -290,20 +341,13 @@ class HandleOntology():
 class ChoosingMove(object):
 
     """
-    This class . 
+    This class was also used in the ChooseMove action server, it executes the server's code. 
+   	It's placed in this node along with other classes that have to interact with the ontology.
+    It's a client to the armor server and chooses in which room the robot should move to after asking for a list of all reachable rooms.
     
-    
-
     """
 
     def __init__(self):
-
-        # # Instantiate and start the action server based on the `SimpleActionServer` class.
-        # self._as = SimpleActionServer('choose_move',
-        #                               assignment2.msg.ChooseMoveAction,
-        #                               execute_cb=self.execute_callback,
-        #                               auto_start=False)
-        # self._as.start()
 
         self.client = ArmorClient('surveyor_','map_ontology_')
     
@@ -332,21 +376,6 @@ class ChoosingMove(object):
         return urgent_rooms, non_urgent_rooms, corridors 
 
     def chose_room(self):
-
-        # success = True
-        # feedback = ChooseMoveFeedback()
-        # result = ChooseMoveResult()
-
-        # if goal is None :
-        #     rospy.logerr('No choose_move goal provided! This service will be aborted!')
-        #     self._as.set_aborted()
-        #     return
-        
-        # if self._as.is_preempt_requested():
-        #         self._as.set_preempted()
-        #         success = False
-        #         return
-
 
         self.client.utils.apply_buffered_changes()
         self.client.utils.sync_buffered_reasoner()
@@ -381,15 +410,4 @@ class ChoosingMove(object):
 
         return go_to
 
-
-        # if self._as.is_preempt_requested():
-        #         self._as.set_preempted()
-        #         success = False
-        #         return
-        
-        # if success:
-        #     print('\n Surveyor will move to location %s \n' %go_to)
-        #     result.chosen_room = go_to
-        #     self._as.set_succeeded(result)
-        #     return
 

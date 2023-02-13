@@ -9,7 +9,7 @@
           
  
           args="it.emarolab.armor.ARMORMainService"
-          launch-prefix= "xterm -e"
+       
 
     > </node>
 

@@ -186,23 +186,23 @@ class Execute_Move(smach.State):
 
                 self.comunicate_to_agent.mutex.release()
 
-class Survey_Room(smach.State):
+class Surveil_Room(smach.State):
     """
-    This class describes the robot behaviour in the Survey Room state. In this version of the code a simple progression bar has been implemented to give an idea of the
-    surveying room action's progress, in future versions another action server will probably be used as it has been done in the Choose Move and Execute Move states.
+    This class describes the robot behaviour in the Surveil Room state. In this version of the code a simple progression bar has been implemented to give an idea of the
+    surveiling room action's progress, in future versions another action server will probably be used as it has been done in the Choose Move and Execute Move states.
     
     """
     def __init__(self,agent_interface):
         self.comunicate_to_agent = agent_interface
-        smach.State.__init__(self, outcomes= ['room_surveyed','go_charge'])
+        smach.State.__init__(self, outcomes= ['room_surveilled','go_charge'])
 
     def execute(self,userdata):
 
         print('[{0}]\n'.format(simple_colors.cyan('='*LINE)))
-        rospy.loginfo('Executing state SURVEY_ROOM')
+        rospy.loginfo('Executing state SURVEIL_ROOM')
 
         self.delay=0.1
-        self.survey_time=5
+        self.surveil_time=50
         time_passed=0
         print('\n')
         goal = SurveilRoomGoal(start = True)
@@ -210,20 +210,20 @@ class Survey_Room(smach.State):
 
         while not rospy.is_shutdown() :
 
-            print('\r Surveyling room: [{0}{1}]'.format(simple_colors.blue('#'*int(20*time_passed)),'_'*int(20*(self.survey_time-time_passed))), end='')
+            print('\r Surveilling room: [{0}{1}]'.format(simple_colors.blue('#'*int(2*time_passed)),'_'*int(2*(self.surveil_time-time_passed))), end='')
 
             if  self.comunicate_to_agent.is_battery_low():
                 print('\n')
-                rospy.loginfo(simple_colors.magenta('Interrupting state SURVEY_ROOM since the battery is too low\n') )
+                rospy.loginfo(simple_colors.magenta('Interrupting state SURVEIL_ROOM since the battery is too low\n') )
                 return 'go_charge'
 
             if self.comunicate_to_agent.surveil_room_client.is_done():
                 
-                return 'room_surveyed'
+                return 'room_surveilled'
            
 
             time.sleep(self.delay)
-            time_passed=(time_passed+self.delay)%self.survey_time
+            time_passed=(time_passed+self.delay)%self.surveil_time
             
 
 
@@ -253,14 +253,14 @@ def main():
 
         smach.StateMachine.add('EXECUTE_MOVE', Execute_Move(agent_interface), 
                                transitions={'go_charge':'CHARGING',
-                                            'move_completed':'SURVEY_ROOM'})
+                                            'move_completed':'SURVEIL_ROOM'})
 
         smach.StateMachine.add('CHOOSE_MOVE', Choose_Move(), 
                                transitions={ 'move_chosen':'EXECUTE_MOVE'})
 
-        smach.StateMachine.add('SURVEY_ROOM', Survey_Room(agent_interface), 
+        smach.StateMachine.add('SURVEIL_ROOM', Surveil_Room(agent_interface), 
                                transitions={'go_charge':'CHARGING',
-                                            'room_surveyed':'CHOOSE_MOVE'})
+                                            'room_surveilled':'CHOOSE_MOVE'})
 
     sis = smach_ros.IntrospectionServer('server_name', sm, '/SM_ROOT')
     sis.start()
