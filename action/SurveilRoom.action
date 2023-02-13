@@ -1,0 +1,18 @@
+###### The motion planning interface
+
+### Action Server Goal
+
+
+bool start
+
+
+---
+
+### Action Server Result
+
+bool done
+
+---
+
+### Action Server Feedback
+

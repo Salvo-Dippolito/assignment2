@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scripts.robot_state &mdash; surveilance_robot_fsm 1.5 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/graphviz.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            surveilance_robot_fsm
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html">Agent Interface Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html#module-scripts.ontology_interface">Ontology Interface Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html#module-scripts.robot_state">Robot State Module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html#module-scripts.surveil_room">Surveil Room Action Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html#module-scripts.execute_move">Execute Move Action Server</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../scripts.html#module-scripts.home_surveilance_state_machine">Finite State Machine Module</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">surveilance_robot_fsm</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">scripts.robot_state</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scripts.robot_state</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">.. module:: battery_state</span>
+<span class="sd">  :platform: Unix</span>
+<span class="sd">  :synopsis: Python module that contains the class BatteryState</span>
+
+<span class="sd">.. moduleauthor:: Salvatore D&#39;Ippolito</span>
+
+<span class="sd">This module can start different nodes that handle some aspects of the robot&#39;s internal state. In this version of the code only a battery state notifier</span>
+<span class="sd">is set up. </span>
+
+<span class="sd">Publishes to: state/battery_low</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">from</span> <span class="nn">random</span> <span class="kn">import</span> <span class="n">uniform</span>
+<span class="kn">import</span> <span class="nn">rospy</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">simple_colors</span>
+
+<span class="c1"># Import the messages used by services and publishers.</span>
+<span class="kn">from</span> <span class="nn">std_msgs.msg</span> <span class="kn">import</span> <span class="n">Bool</span>
+
+<span class="kn">from</span> <span class="nn">agent_interface</span> <span class="kn">import</span> <span class="n">AgentState</span>
+
+
+
+<div class="viewcode-block" id="RobotState"><a class="viewcode-back" href="../../scripts.html#scripts.robot_state.RobotState">[docs]</a><span class="k">class</span> <span class="nc">RobotState</span><span class="p">:</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    This class can run the code of various publishers that update the states of some internal robot functions.</span>
+
+<span class="sd">    In this iteration of the code only the battery state publisher is implemented. It is initiated on a separate thread </span>
+<span class="sd">    and publishes on the topic &#39;state/battery_low&#39; where it periodically updates the state of the robot&#39;s battery.</span>
+
+
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      
+        <span class="n">rospy</span><span class="o">.</span><span class="n">init_node</span><span class="p">(</span><span class="s1">&#39;robot_state&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Battery publisher variables</span>
+    <span class="c1">#---------------------------------------------------------</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_battery</span><span class="o">=</span><span class="mi">100</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">discharging_battery_change</span><span class="o">=</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">battery_change</span><span class="o">=</span><span class="mi">1</span>
+        
+        <span class="c1">#starts from a full charge</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">battery_level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_battery</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">battery_autonomy</span> <span class="o">=</span> <span class="mi">400</span> <span class="c1">#[s] </span>
+
+        <span class="c1"># Set ratio between discharging battery change and charging battery change</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ratio</span><span class="o">=</span><span class="mi">16</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">charging_battery_change</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discharging_battery_change</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">ratio</span>
+        
+
+        <span class="c1"># Set this variable to true to test architecture with a random battery state notifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random</span> <span class="o">=</span> <span class="kc">False</span>    
+
+
+        <span class="c1"># time needed to go through 1% of the battery, given the battery autonomy that has been set</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">battery_autonomy</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">max_battery</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">discharging_battery_change</span><span class="p">)</span>
+
+
+    <span class="c1">#</span>
+    <span class="c1">#---------------------------------------------------------</span>
+
+        <span class="n">agent_interface</span> <span class="o">=</span> <span class="n">AgentState</span><span class="p">()</span>
+        <span class="n">th</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_battery_low</span><span class="p">)</span>
+        <span class="n">th</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+      
+        <span class="bp">self</span><span class="o">.</span><span class="n">comunicate_to_agent</span> <span class="o">=</span> <span class="n">agent_interface</span>
+<div class="viewcode-block" id="RobotState.is_battery_low"><a class="viewcode-back" href="../../scripts.html#scripts.robot_state.RobotState.is_battery_low">[docs]</a>    <span class="k">def</span> <span class="nf">is_battery_low</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This method holds the code for the battery state publisher. It simulates a charging and discharging cycle that runs independently</span>
+<span class="sd">        from the rest of the code and publishes on the topic /state/battery_low if the battery is charged or not.</span>
+
+<span class="sd">        If self.random in the RobotState class initializer is set to True then it will not simulate a charging cycle and instead will </span>
+<span class="sd">        change the state of the battery at random time intervals</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">random</span><span class="p">:</span>
+
+            <span class="n">publisher</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Publisher</span><span class="p">(</span><span class="s1">&#39;state/battery_low&#39;</span><span class="p">,</span> <span class="n">Bool</span><span class="p">,</span> <span class="n">queue_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">latch</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+           
+         
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">():</span>
+
+            
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">battery_level</span><span class="o">&gt;=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_battery</span><span class="p">:</span>
+                  
+                  <span class="c1"># DISCHARGING LOOP </span>
+                    <span class="c1"># Change battery state to high:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span> <span class="o">=</span> <span class="kc">False</span>
+                    
+                    <span class="c1"># Publish current state of the battery:</span>
+                    <span class="n">publisher</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">Bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span><span class="p">))</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">battery_change</span> <span class="o">=</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">discharging_battery_change</span>
+
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">battery_level</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+
+                    <span class="c1"># CHARGING LOOP</span>
+                  
+                    <span class="c1"># Change battery state to low:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span><span class="o">=</span> <span class="kc">True</span>
+
+                    <span class="c1"># Publish current state of the battery:</span>
+                    <span class="n">publisher</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">Bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span><span class="p">))</span>
+                    
+                     
+
+                    <span class="c1"># Give the fsm some time to update if the plug is reached</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                   
+                                 
+                    <span class="c1"># WAIT FOR ROBOT TO GET TO POINT</span>
+                    <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">comunicate_to_agent</span><span class="o">.</span><span class="n">is_charging_point_reached</span><span class="p">():</span>
+                        <span class="k">pass</span>
+                    
+                    <span class="bp">self</span><span class="o">.</span><span class="n">battery_change</span><span class="o">=</span> <span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">charging_battery_change</span>
+                    
+                
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delay</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">battery_level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">battery_level</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">battery_change</span>
+                <span class="c1"># print(self.battery_level)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span><span class="p">:</span>
+
+
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\r</span><span class="s1"> Battery level: [</span><span class="si">{0}{1}</span><span class="s1">] </span><span class="si">{2}</span><span class="s1">%&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">simple_colors</span><span class="o">.</span><span class="n">yellow</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">battery_level</span><span class="p">)),</span><span class="s1">&#39;_&#39;</span><span class="o">*</span><span class="nb">int</span><span class="p">(</span><span class="mi">100</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">battery_level</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">battery_level</span><span class="p">),</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="n">publisher</span> <span class="o">=</span> <span class="n">rospy</span><span class="o">.</span><span class="n">Publisher</span><span class="p">(</span><span class="s1">&#39;state/battery_low&#39;</span><span class="p">,</span> <span class="n">Bool</span><span class="p">,</span> <span class="n">queue_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">latch</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+         
+            <span class="k">while</span> <span class="ow">not</span> <span class="n">rospy</span><span class="o">.</span><span class="n">is_shutdown</span><span class="p">():</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">delay</span><span class="o">=</span><span class="n">uniform</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">30</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">simple_colors</span><span class="o">.</span><span class="n">red</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> RANDOM ROBOT STATE: Will wait for </span><span class="si">%d</span><span class="s1"> seconds for the battery to change state&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">delay</span><span class="p">))</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delay</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span><span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># Publish current state of the battery:</span>
+                <span class="n">publisher</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">Bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span><span class="p">))</span>
+
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">delay</span><span class="o">=</span><span class="n">uniform</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">30</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">simple_colors</span><span class="o">.</span><span class="n">red</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1"> RANDOM ROBOT STATE: Will wait for </span><span class="si">%d</span><span class="s1"> seconds for the battery to change state&#39;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">delay</span><span class="p">))</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delay</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="c1"># Publish current state of the battery:</span>
+                <span class="n">publisher</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">Bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_battery_low</span><span class="p">))</span>
+
+                <span class="c1"># Give the fsm some time to update if the plug is reached</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+                   
+                                 
+                <span class="c1"># WAIT FOR ROBOT TO GET TO POINT</span>
+                <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">comunicate_to_agent</span><span class="o">.</span><span class="n">is_charging_point_reached</span><span class="p">():</span>
+                    <span class="k">pass</span></div></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+  
+
+    <span class="n">RobotState</span><span class="p">()</span>
+    <span class="n">rospy</span><span class="o">.</span><span class="n">spin</span><span class="p">()</span>
+
+
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Salvatore D&#39;Ippolito.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

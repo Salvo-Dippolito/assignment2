@@ -30,27 +30,36 @@ from armor_api.armor_query_client import ArmorQueryClient
 from armor_api.armor_utils_client import ArmorUtilsClient
 
 import actionlib
+from actionlib import SimpleActionClient, GoalStatus
 from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
 from actionlib_msgs.msg import GoalID
 
+from actionlib_msgs.msg import GoalStatus
+from geometry_msgs.msg import PoseStamped
 
 
-    
+
+
+
+from agent_interface import AgentState
+
+
 
 class Moving2Location:
 
     """
-    This class instantiates the execute_move action server. This server is tasked to move the robot inside its ontology, it receives the desired new 
-    location as a request string and returns a boolean value as a response after the motion of the robot has been completed.
 
-    In a more complex scenario this server would also be tasked to actually control the robot's motion in a simulated environment, and not only in 
-    its ontological representation. For now it simulates the time it might need the robot to move for some distance. This distance is currently set
-    randomly by this same server. The progress done on this artificial distance is published as the server's feedback message.
+    This class instantiates the execute_move action server. This server is tasked to move the robot both inside its ontology, and in the simulated 
+    environment. It receives the desired new location as a request string and returns a boolean value as a response after the actual motion of the robot 
+    has been completed. This server is itself a client to the move base action server.
     
-
     """
 
     def __init__(self):
+
+        self.goal_x = 0.0
+
+        self.goal_y = 0.0
 
         # Instantiating and starting the action server based on the `SimpleActionServer` class.
         self._as = SimpleActionServer('execute_move',
@@ -61,105 +70,82 @@ class Moving2Location:
 
         self.client = ArmorClient('surveyor_','map_ontology_')
 
-        #Setting up as a client to the move_base server:
-        self.move_client = actionlib.SimpleActionClient('move_base',MoveBaseAction)
-        rospy.loginfo("Waiting for move_base action server...")
-        wait = self.move_client.wait_for_server(rospy.Duration(5.0))
-        if not wait:
-            rospy.logerr("Action server not available!")
-            rospy.signal_shutdown("Action server not available!")
-            return
-        rospy.loginfo("Connected to move base server")
-  
-    def done_cb(self, status, result):
+        self.feedback = ExecuteMoveFeedback()
+        self.result = ExecuteMoveResult()
 
-    # This callback interprets the received goal status for the user 
-    # Reference for terminal status values: http://docs.ros.org/diamondback/api/actionlib_msgs/html/msg/GoalStatus.html
-        if status == 2:
-            print("  Received a cancel request\n")
-            
-        if status == 3:
-            print("  Goal reached!\n ")
-            
-
-        if status == 4:
-            print("  Can't reach desired target\n")
-                     
-
-        if status == 5:
-            print("  Goal rejected by action server\n")
-                    
-
-    def active_cb(self):
-        print("  we gon get there man '\n\r", flush=True)
-
-    def feedback_cb(self, feedback ):
-        
-        #Uncomment this to have the feedback printed on the terminal: 
-        #print(str(feedback))
-        pass
-
+        self.comunicate_to_agent =  AgentState()
 
 
     def execute_callback(self, goal):
 
         success = True
-        feedback = ExecuteMoveFeedback()
-        result = ExecuteMoveResult()
 
-        # dist_to_location= uniform(0.5,4) # [m]
-        # time_interval=0.1                # [s]
-        # speed=0.5                        # [m/s]
-        
         if goal is None :
             rospy.logerr('No execute_move goal provided! This service will be aborted!')
             self._as.set_aborted()
             return
-        # send request to movebase here:
+       
+        print("new execute move going to: %.2f, %.2f" %(goal.x, goal.y))
 
+        self.goal_x=goal.x
+        self.goal_y=goal.y
 
-
-        print(goal.x)
-        print(goal.y)
-
+        # Send goal to move_base
         self.try_goal( goal.x, goal.y)
 
-        #waiting for a result from the action server:
-        self.move_client.wait_for_result()
+       
+        while not rospy.is_shutdown(): 
 
-        # meters_traveled=0
-        # while meters_traveled<dist_to_location :
+            self.comunicate_to_agent.mutex.acquire()
+            try:
+               
+                # Cancel move_base goal if execute_move gets preempted               
+                if  self._as.is_preempt_requested():
+                    self.comunicate_to_agent.move_base_client.cancel_goals()
+                    self._as.set_preempted()
+                    success = False
+                    print("execute_move preempted")
+                    self.comunicate_to_agent.move_base_client.wait_for_result()
 
-        #     if self._as.is_preempt_requested():
-        #         self._as.set_preempted()
-        #         success = False
-        #         return
+                    break
 
-        #     #simulating movement in time:
-        #     rospy.sleep(time_interval)
-        #     meters_traveled=meters_traveled+speed*time_interval
-            
-        #     feedback.meters_to_destination = dist_to_location-meters_traveled
-        #     self._as.publish_feedback(feedback)
+                if  self.comunicate_to_agent.move_base_client.is_done():
+                    print("move base goal reached")
+                    break
 
-        self.move_robot(goal.move_to)
-        result.location_reached = True   
+            finally:
+
+                self.comunicate_to_agent.mutex.release()
 
         if success:
-            self._as.set_succeeded(result)
+           
+            self.move_robot(goal.move_to)
+            
+            self.result.location_reached = True 
+            
+            
+            self._as.set_succeeded(self.result)
+            
             return
 
     def try_goal(self,goal_x,goal_y):
 
-        goal=MoveBaseGoal()
+        """
 
-        goal.target_pose.header.frame_id = 'map'
-        goal.target_pose.header.stamp = rospy.Time.now()
-        goal.target_pose.pose.position.x = goal_x
-        goal.target_pose.pose.position.y = goal_y   
-        goal.target_pose.pose.orientation.w = 1.0
+        This method prepares the goal message for the move_base server and sends it.
 
-        self.move_client.send_goal(goal, self.done_cb, self.active_cb, self.feedback_cb)
+        """
+
+        mb_goal=MoveBaseGoal()
+
+        mb_goal.target_pose.header.frame_id = 'map'
+        mb_goal.target_pose.header.stamp = rospy.Time.now()
+        mb_goal.target_pose.pose.position.x = goal_x
+        mb_goal.target_pose.pose.position.y = goal_y   
+        mb_goal.target_pose.pose.orientation.w = 1.0
+
+        # self.move_client.send_goal(goal, self.done_cb, self.active_cb, self.feedback_cb)
+        self.comunicate_to_agent.move_base_client.send_goal(mb_goal)
         
 
     def move_robot(self,new_location):

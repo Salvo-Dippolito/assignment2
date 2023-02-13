@@ -1,4 +1,4 @@
-global_costmap: 
+global_costmap:
    global_frame: map
    robot_base_frame: base_link
    update_frequency: 1.0
@@ -7,4 +7,4 @@ global_costmap:
    transform_tolerance: 1.0
    inflation_layer:
         inflation_radius: 1.0
-        cost_scaling_factor: 10
+        cost_scaling_factor: 20

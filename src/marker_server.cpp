@@ -7,8 +7,8 @@ bool markerCallback(assignment2::RoomInformation::Request &req, assignment2::Roo
 	switch (req.id){
 	case 11:
 		res.room = "E";
-		res.x = 1.5;
-		res.y = 8.0;
+		res.x = 2;
+		res.y = 8.5;//-----------------------------------CHANGED THESE
 		conn.connected_to = "C1";
 		conn.through_door = "D5";
 		res.connections.push_back(conn);

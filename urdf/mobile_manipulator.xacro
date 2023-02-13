@@ -2,17 +2,17 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="mobile_manipulator">
 <xacro:include filename="$(find assignment2)/urdf/mobile_manipulator.gazebo"/>
 
-<!-- <robot name="mobile_manipulator"> -->
+
 
 <!--################################# BASE #####################################-->
 
-  <link name="base_link">
+<link name="base_link">
     <inertial>
       <origin
-        xyz="0.0030946 4.78250032638821E-11 0.053305"
+        xyz="0 0 0"
         rpy="0 0 0" />
       <mass
-        value="47.873" />
+        value="50" />
       <inertia
         ixx="0.774276574699151"
         ixy="-1.03781944357671E-10"
@@ -21,28 +21,91 @@
         iyz="1.09578155845563E-12"
         izz="2.1239326987473" />
     </inertial>
-    <visual>
+   
+  <!-- Main Body -->
+    <visual name="base">
       <origin
-        xyz="0 0 0"
-        rpy="1.5707963267949 0 3.14" />
+        xyz="0 0 0.05"
+        rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://assignment2/meshes/robot_base.stl" />
+        <cylinder length="0.19" radius="0.25"/>      
       </geometry>
       <material
-        name="">
+        name="ginster_yellow">
         <color
-          rgba="0.79216 0.81961 0.93333 1" />
+          rgba="1.0 0.843137 0.0 1.0" />
       </material>
     </visual>
-    <collision>
+    
+    <collision name="base">
       <origin
-        xyz="0 0 0"
-        rpy="1.5707963267949 0 3.14" />
+        xyz="0.1 0 0.05"
+        rpy="0 0 0" />
       <geometry>
-        <mesh filename="package://assignment2/meshes/robot_base.stl" />
+        <cylinder length="0.2" radius="0.25"/>
       </geometry>
     </collision>
+
+    <visual name="base_top">
+      <origin
+        xyz="0.1 0 0.075"
+        rpy="0 0 0" />
+      <geometry>
+        <box size= " 0.4 0.3 0.15"/>    
+      </geometry>
+      <material
+        name="tornado_red">
+        <color
+          rgba="1 0.1411765 0.0 1.0" />
+      </material>
+    </visual>
+    
+    <collision name="base_top">
+      <origin
+        xyz="0.1 0 0.75"
+        rpy="0 0 0" />
+      <geometry>
+        <box size= " 0.4 0.3 0.15"/>  
+      </geometry>
+    </collision>
+
+
+  <!-- Castors -->
+
+    <visual name="caster_front">
+      <origin rpy=" 0 0 0" xyz="0.2 0 -0.05"/>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <material name="pistachio_green">
+        <color rgba="0.11372549 0.75294118 0.62352941 1.0"/>
+      </material>
+    </visual>
+    <collision name="caster_front">
+      <origin rpy=" 0 0 0" xyz="0.2 0 -0.05"/>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+    </collision>
+
+    <visual name="caster_back">
+      <origin rpy=" 0 0 0" xyz="-0.2 0 -0.049"/>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+      <material name="pistachio_green">
+        <color rgba="0.11372549 0.75294118 0.62352941 1.0"/>
+      </material>
+    </visual>
+    <collision name="caster_back">
+      <origin rpy=" 0 0 0" xyz="-0.2 0 -0.049"/>
+      <geometry>
+        <sphere radius="0.05"/>
+      </geometry>
+    </collision>
+
   </link>
+
 
 <link name="front_left_wheel">
     <inertial>
@@ -62,20 +125,20 @@
     <visual>
       <origin
         xyz="0 0 0"
-        rpy="1.5707963267949 0 0" />
+        rpy="-1.5707963267949 0 0" />
       <geometry>
         <mesh filename="package://assignment2/meshes/wheel.stl" />
       </geometry>
       <material
-        name="">
+        name="chagall_blue">
         <color
-          rgba="0.79216 0.81961 0.93333 1" />
+          rgba="0.09411765 0.42352942 0.56862745 1.0" />
       </material>
     </visual>
     <collision>
       <origin
         xyz="0 0 0"
-        rpy="1.5707963267949 0 0" />
+        rpy="-1.5707963267949 0 0" />
       <geometry>
         <mesh filename="package://assignment2/meshes/wheel.stl" />
       </geometry>
@@ -105,9 +168,9 @@
         <mesh filename="package://assignment2/meshes/wheel.stl" />
       </geometry>
       <material
-        name="">
+        name="chagall_blue">
         <color
-          rgba="0.79216 0.81961 0.93333 1" />
+          rgba="0.09411765 0.42352942 0.56862745 1.0" />
       </material>
     </visual>
     <collision>
@@ -120,81 +183,6 @@
     </collision>
   </link>
 
-<link name="rear_left_wheel">
-    <inertial>
-      <origin
-        xyz="-4.1867E-18 0.0068085 -1.65658661799998E-18"
-        rpy="0 0 0" />
-      <mass
-        value="2.6578" />
-      <inertia
-        ixx="0.00856502765719703"
-        ixy="1.5074118157338E-19"
-        ixz="-4.78150098725052E-19"
-        iyy="0.013670640432096"
-        iyz="-2.68136447099727E-19"
-        izz="0.00856502765719703" />
-    </inertial>
-    <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="1.5707963267949 0 0" />
-      <geometry>
-        <mesh filename="package://assignment2/meshes/wheel.stl" />
-      </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.79216 0.81961 0.93333 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="1.5707963267949 0 0" />
-      <geometry>
-        <mesh filename="package://assignment2/meshes/wheel.stl" />
-      </geometry>
-    </collision>
-  </link>
-
-<link name="rear_right_wheel">
-    <inertial>
-      <origin
-        xyz="-4.1867E-18 0.0068085 -1.65658661799998E-18"
-        rpy="0 0 0" />
-      <mass
-        value="2.6578" />
-      <inertia
-        ixx="0.00856502765719703"
-        ixy="1.5074118157338E-19"
-        ixz="-4.78150098725052E-19"
-        iyy="0.013670640432096"
-        iyz="-2.68136447099727E-19"
-        izz="0.00856502765719703" />
-    </inertial>
-    <visual>
-      <origin
-        xyz="0 0 0"
-        rpy="1.5707963267949 0 0" />
-      <geometry>
-        <mesh filename="package://assignment2/meshes/wheel.stl" />
-      </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.79216 0.81961 0.93333 1" />
-      </material>
-    </visual>
-    <collision>
-      <origin
-        xyz="0 0 0"
-        rpy="1.5707963267949 0 0" />
-      <geometry>
-        <mesh filename="package://assignment2/meshes/wheel.stl" />
-      </geometry>
-    </collision>
-  </link>
 
 
 
@@ -202,31 +190,29 @@
     <axis xyz="0 1 0"/>
     <parent link ="base_link"/>
     <child link ="front_left_wheel"/>
-    <origin rpy ="0 0 0" xyz= "0.220 0.250 0"/>
+    <origin rpy ="0 0 0" xyz= "0 0.250 0"/>
+    
   </joint>
-
 
 <joint name="front_right_wheel_joint" type="continuous">
     <axis xyz="0 1 0"/>
     <parent link ="base_link"/>
     <child link ="front_right_wheel"/>
-    <origin rpy ="0 0 0" xyz= "0.220 -0.250 0"/>
+
+    <origin rpy ="0 0 0" xyz= "0 -0.250 0"/>
   </joint>
 
-<joint name="rear_left_wheel_joint" type="continuous">
-    <axis xyz="0 1 0"/>
-    <parent link ="base_link"/>
-    <child link ="rear_left_wheel"/>
-    <origin rpy ="0 0 0" xyz= "-0.220 0.250 0"/>
-  </joint>
+<gazebo reference="front_right_wheel">
+  <material>Gazebo/DarkGrey</material>
+</gazebo>
 
-<joint name="rear_right_wheel_joint" type="continuous">
-    <axis xyz="0 1 0"/>
-    <parent link ="base_link"/>
-    <child link ="rear_right_wheel"/>
-    <origin rpy ="0 0 0" xyz= "-0.220 -0.250 0"/>
-</joint>
+<gazebo reference="front_left_wheel">
+  <material>Gazebo/DarkGrey</material>
+</gazebo>
 
+<gazebo reference="base_link">
+  <material>Gazebo/Orange</material>
+</gazebo>
 
 <!--############################## ARM ########################################-->
 
@@ -252,10 +238,8 @@
       <geometry>
         <mesh filename="package://assignment2/meshes/arm_base.stl" />
       </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.79216 0.81961 0.93333 1" />
+      <material name="beige">
+        <color rgba="0.9627451 0.9627451 0.8627451 1.0"/>
       </material>
     </visual>
     <collision>
@@ -291,10 +275,8 @@
       <geometry>
         <mesh filename="package://assignment2/meshes/bicep.stl" />
       </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.79216 0.81961 0.93333 1" />
+      <material name="beige">
+        <color rgba="0.9627451 0.9627451 0.8627451 1.0"/>
       </material>
     </visual>
     <collision>
@@ -331,10 +313,8 @@
       <geometry>
         <mesh filename="package://assignment2/meshes/wrist.stl" />
       </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.79216 0.81961 0.93333 1" />
+      <material name="beige">
+        <color rgba="0.9627451 0.9627451 0.8627451 1.0"/>
       </material>
     </visual>
     <collision>
@@ -370,10 +350,8 @@
       <geometry>
         <mesh filename="package://assignment2/meshes/elbow.stl" />
       </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.79216 0.81961 0.93333 1" />
+      <material name="beige">
+        <color rgba="0.9627451 0.9627451 0.8627451 1.0"/>
       </material>
     </visual>
     <collision>
@@ -409,10 +387,8 @@
       <geometry>
         <mesh filename="package://assignment2/meshes/wrist.stl" />
       </geometry>
-      <material
-        name="">
-        <color
-          rgba="0.79216 0.81961 0.93333 1" />
+      <material name="beige">
+        <color rgba="0.9627451 0.9627451 0.8627451 1.0"/>
       </material>
     </visual>
     <collision>
@@ -460,6 +436,25 @@
   <origin rpy="0 0 0" xyz="0.0 0 0.20994"/>
 </joint>
 
+<gazebo reference="arm_base">
+  <material>Gazebo/Yellow</material>
+</gazebo>
+
+<gazebo reference="bicep">
+  <material>Gazebo/Yellow</material>
+</gazebo>
+
+<gazebo reference="bottom_wrist">
+  <material>Gazebo/Yellow</material>
+</gazebo>
+
+<gazebo reference="elbow">
+  <material>Gazebo/Yellow</material>
+</gazebo>
+
+<gazebo reference="top_wrist">
+  <material>Gazebo/Yellow</material>
+</gazebo>
 
 <!--########################## CAMERA LINK ############################################-->
 <link name="camera_link">
@@ -497,22 +492,45 @@
 </gazebo>
 
 <!--########################## HOKUYO LINK ############################################-->
+
+
+
+
 <link name="hokuyo_link">
-  <collision>
-    <origin rpy="0 0 0" xyz="0 0 0.025"/>
-    <geometry>
-      <box size="0.05 0.05 0.05"/>
-    </geometry>
-  </collision>
   <visual>
-    <origin rpy="0 0 0" xyz="0 0 0.025"/>
+    <origin xyz="0 0 0" rpy="0 0 0" />
     <geometry>
-      <box size="0.05 0.05 0.05"/>
+      <cylinder length="0.06" radius="0.025"/>      
     </geometry>
-    <material name="blue">
-      <color rgba="1 0 0 1"/>
+    <material name="dark">
+      <color rgba="0.10980392 0.10980392 0.10980392 1.0" />
     </material>
   </visual>
+    
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <cylinder length="0.06" radius="0.025"/>
+      </geometry>
+    </collision>
+
+  <visual>
+    <origin xyz="0 0 -0.04" rpy="0 0 0" />
+    <geometry>
+     <box size="0.05 0.05 0.05"/>     
+    </geometry>
+    <material name="dark">
+      <color rgba="0.10980392 0.10980392 0.10980392 1.0" />
+    </material>
+  </visual>
+    
+    <collision>
+     <origin xyz="0 0 -0.04" rpy="0 0 0" />
+      <geometry>
+        <box size="0.05 0.05 0.05"/>
+      </geometry>
+    </collision>
+
   <inertial>
     <mass value="1e-5"/>
     <origin rpy="0 0 0" xyz="0 0 0"/>
@@ -526,7 +544,7 @@
 
 <joint name="hokuyo_joint" type="fixed">
   <axis xyz="0 1 0"/>
-  <origin rpy="0 0 0" xyz="0.4 0 0.15"/>
+  <origin rpy="0 0 0" xyz="0.325 0 0.1"/>
   <parent link="base_link"/>
   <child link="hokuyo_link"/>
 </joint>
@@ -553,28 +571,6 @@
    <mechanicalReduction>1</mechanicalReduction>
   </actuator>
   <joint name="front_right_wheel_joint">
-   <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-  </joint>
-</transmission>
-
-<transmission name="rear_left_wheel_trans" type="SimpleTransmission">
-  <type>transmission_interface/SimpleTransmission</type>
-  <actuator name="rear_left_wheel_motor">
-   <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-   <mechanicalReduction>1</mechanicalReduction>
-  </actuator>
-  <joint name="rear_left_wheel_joint">
-   <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-  </joint>
-</transmission>
-
-<transmission name="rear_right_wheel_trans" type="SimpleTransmission">
-  <type>transmission_interface/SimpleTransmission</type>
-  <actuator name="rear_right_wheel_motor">
-   <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
-   <mechanicalReduction>1</mechanicalReduction>
-  </actuator>
-  <joint name="rear_right_wheel_joint">
    <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
   </joint>
 </transmission>

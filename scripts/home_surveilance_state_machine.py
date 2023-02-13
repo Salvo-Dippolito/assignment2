@@ -11,7 +11,7 @@
 This module contains the code of this simulation's main node, the 'surveyor_state_machine' node. It instantiates the robot's finite state 
 machine architecture and coordinates the robot's behaviour through the use of the AgentState class.
 The finite state machine used is built using the smach_ros architecture so all states are defined as classes, in this version of the code 5 states have
-been used to characterize the robot's behaviour so five classes have been made.
+been used to characterize the robot's behaviour, so five classes have been made.
 
 """
 
@@ -23,23 +23,27 @@ import smach_ros
 import time
 import random
 import simple_colors
-from ontology_interface import HandleOntology
+from ontology_interface import HandleOntology, ChoosingMove
 
 from armor_api.armor_client import ArmorClient
 
 from assignment2.msg import ExecuteMoveFeedback, ExecuteMoveResult, ExecuteMoveGoal, ExecuteMoveAction
-from assignment2.msg import ChooseMoveFeedback, ChooseMoveResult, ChooseMoveGoal, ChooseMoveAction
+#from assignment2.msg import ChooseMoveFeedback, ChooseMoveResult, ChooseMoveGoal, ChooseMoveAction
+from assignment2.msg import SurveilRoomFeedback, SurveilRoomResult, SurveilRoomGoal, SurveilRoomAction
 
 from agent_interface import AgentState
 
+# Import ROS-based messages.
+from std_msgs.msg import Bool
 
 
-LINE=150
+
+LINE=50
 
 class Load_Map(smach.State):
     """
-    This class handles the initial state of the robot's state machine, where the robot's floor ontology is built using the HandleOntology class defined in the 
-    ontology_interface module.
+    This class handles the initial state of the robot's state machine, where the robot's floor ontology is built using the HandleOntology
+    class defined in the ontology_interface module.
 
     """
     def __init__(self):
@@ -64,39 +68,52 @@ class Load_Map(smach.State):
 
 class Charging(smach.State):
     """
-    This class simulates the agent's charging state, the finite state machine transitions to this state whenever the robot state node notifies that the robot is low 
-    on battery. This state also calls the execute_move server to move the robot towards its charging station room before initiating the charging sequence.
+    This class simulates the agent's charging state, the finite state machine transitions to this state whenever the robot state node notifies 
+    that the robot is low on battery. This state also calls the execute_move action server to move the robot towards its charging station room
+    before initiating the charging sequence.
+
+    This class publishes on the state/reached_charging_point topic to notify the robot_state node that the robot has reached the charging point
+    and can start the charging sequence.
 
     """
     def __init__(self,agent_interface):
-        
         self.comunicate_to_agent = agent_interface  
         smach.State.__init__(self, outcomes=['full_charge'])
+        self._charging_point_reached=False
+
+        # Set up as publisher on state/reached_charging_point
+        self.publisher1 = rospy.Publisher('state/reached_charging_point', Bool, queue_size=1, latch=True)
 
     def execute(self, userdata):
 
         print('[{0}]\n'.format(simple_colors.cyan('='*LINE)))
         rospy.loginfo('Executing state CHARGING')
+        
+        self._charging_point_reached=False
+        self.publisher1.publish(Bool(self._charging_point_reached))
 
         # Reaching the charging station:
         #-----------------------------------------------------------------
-        goal = ExecuteMoveGoal(move_to='E')        
+        goal_coordinates=[1.5, 8.0]
+        goal = ExecuteMoveGoal(move_to='E', x=goal_coordinates[0], y=goal_coordinates[1])        
         self.comunicate_to_agent.execute_move_client.send_goal(goal)
-       
+
+
         print('\n  Moving to charging station\n {}\n'.format('-'*int(LINE/4)))
 
-        while not self.comunicate_to_agent.execute_move_client.is_done(): 
-            
-            if self.comunicate_to_agent.meters_to_destination() is not None:
+        self.comunicate_to_agent.execute_move_client.wait_for_result()
 
-                print('\r Distance left to charging station: %.2f [m] '%self.comunicate_to_agent.meters_to_destination(),end='')
-     
+        self._charging_point_reached=True
+        self.publisher1.publish(Bool(self._charging_point_reached))
+    
+
         # Waiting for battery to charge:
         #----------------------------------------------------------------
         print('\n  Charging Station reached, initiating charging sequence\n {}\n'.format('-'*int(LINE/4)))
         battery_level=0
 
-        while  self.comunicate_to_agent.is_battery_low() and not rospy.is_shutdown():
+        # wait until charged
+        while  self.comunicate_to_agent.is_battery_low():
 
             pass
 
@@ -106,43 +123,28 @@ class Charging(smach.State):
 
 class Choose_Move(smach.State):
     """
-    This class launches the choose_move action server, in this state the robot chooses where to go based on what rooms are imediately reachable according to the ontology.
-    The chosen destination gets passed on to the Execute Move state through the state machine's userdata structure. The action server request can get preempted if the 
-    battery state changes to low during the server's execution.
+    This class instantiates the Choose Move state , in this state the robot chooses where to go based on what rooms are imediately reachable
+    according to the ontology. The chosen destination gets passed on to the Execute Move state through the state machine's userdata structure. 
+    
+    It's a very short state that has only one outcome that triggers the Execute Move state.
 
     """
-    def __init__(self,agent_interface):
+    def __init__(self):
         
-        self.comunicate_to_agent = agent_interface
-        smach.State.__init__(self,outcomes=['move_chosen','go_charge'],
+        self.choose_move = ChoosingMove()
+        
+        smach.State.__init__(self,outcomes=['move_chosen'],
                                   output_keys=['chosen_destination'])
 
     def execute(self,userdata):
 
         print('[{0}]\n'.format(simple_colors.cyan('='*LINE)))
         rospy.loginfo('Executing state CHOOSE_MOVE')
-
-        goal = ChooseMoveGoal(start_plan = True)
-        self.comunicate_to_agent.choose_move_client.send_goal(goal)
         
-        while not rospy.is_shutdown(): 
+        userdata.chosen_destination = self.choose_move.chose_room()
+        
+        return 'move_chosen'
 
-            self.comunicate_to_agent.mutex.acquire()
-            try:
-               
-                if  self.comunicate_to_agent.is_battery_low():
-                    self.comunicate_to_agent.choose_move_client.cancel_goals()
-                    print('\n')
-                    rospy.loginfo(simple_colors.magenta('Interrupting state CHOOSE_MOVE since the battery is too low\n'))             
-                    return 'go_charge'
-
-                if  self.comunicate_to_agent.choose_move_client.is_done():
-                    userdata.chosen_destination = self.comunicate_to_agent.choose_move_client.get_results().chosen_room
-                    return 'move_chosen'
-
-            finally:
-
-                self.comunicate_to_agent.mutex.release()
 
 class Execute_Move(smach.State):
     """
@@ -203,23 +205,26 @@ class Survey_Room(smach.State):
         self.survey_time=5
         time_passed=0
         print('\n')
+        goal = SurveilRoomGoal(start = True)
+        self.comunicate_to_agent.surveil_room_client.send_goal(goal)
 
         while not rospy.is_shutdown() :
 
-            print('\r Surveying room: [{0}{1}]'.format(simple_colors.blue('#'*int(20*time_passed)),'_'*int(20*(self.survey_time-time_passed))), end='')
+            print('\r Surveyling room: [{0}{1}]'.format(simple_colors.blue('#'*int(20*time_passed)),'_'*int(20*(self.survey_time-time_passed))), end='')
 
             if  self.comunicate_to_agent.is_battery_low():
                 print('\n')
                 rospy.loginfo(simple_colors.magenta('Interrupting state SURVEY_ROOM since the battery is too low\n') )
                 return 'go_charge'
 
-            if time_passed>self.survey_time:
-                print('\n')
+            if self.comunicate_to_agent.surveil_room_client.is_done():
+                
                 return 'room_surveyed'
            
 
             time.sleep(self.delay)
-            time_passed=time_passed+self.delay
+            time_passed=(time_passed+self.delay)%self.survey_time
+            
 
 
 
@@ -250,9 +255,8 @@ def main():
                                transitions={'go_charge':'CHARGING',
                                             'move_completed':'SURVEY_ROOM'})
 
-        smach.StateMachine.add('CHOOSE_MOVE', Choose_Move(agent_interface), 
-                               transitions={'go_charge':'CHARGING',
-                                            'move_chosen':'EXECUTE_MOVE'})
+        smach.StateMachine.add('CHOOSE_MOVE', Choose_Move(), 
+                               transitions={ 'move_chosen':'EXECUTE_MOVE'})
 
         smach.StateMachine.add('SURVEY_ROOM', Survey_Room(agent_interface), 
                                transitions={'go_charge':'CHARGING',

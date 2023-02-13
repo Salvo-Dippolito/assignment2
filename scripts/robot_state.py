@@ -24,6 +24,7 @@ import simple_colors
 # Import the messages used by services and publishers.
 from std_msgs.msg import Bool
 
+from agent_interface import AgentState
 
 
 
@@ -47,30 +48,39 @@ class RobotState:
     # Battery publisher variables
     #---------------------------------------------------------
 
-        # Start from a charged battery:
         self._battery_low = False
         self.max_battery=100
         
-        #starts from a full charge, to start from an empty charge you must also have to change the sign of
-        #self.battery_change
+        self.discharging_battery_change=1
+        self.battery_change=1
+        
+        #starts from a full charge
         self.battery_level=self.max_battery
         
+        self.battery_autonomy = 400 #[s] 
 
+        # Set ratio between discharging battery change and charging battery change
+        self.ratio=16
 
-        # Set seconds it takes to increase the charge by 1%
-        self.delay = 0.3
-        self.battery_change=1
+        self.charging_battery_change = self.discharging_battery_change * self.ratio
+        
 
         # Set this variable to true to test architecture with a random battery state notifier
-        self.random = False       
+        self.random = False    
+
+
+        # time needed to go through 1% of the battery, given the battery autonomy that has been set
+        self.delay = self.battery_autonomy/(self.max_battery/self.discharging_battery_change)
+
 
     #
     #---------------------------------------------------------
 
-
+        agent_interface = AgentState()
         th = threading.Thread(target=self.is_battery_low)
         th.start()
-    
+      
+        self.comunicate_to_agent = agent_interface
     def is_battery_low(self):
         
         """
@@ -85,39 +95,48 @@ class RobotState:
         if not self.random:
 
             publisher = rospy.Publisher('state/battery_low', Bool, queue_size=1, latch=True)
+           
          
             while not rospy.is_shutdown():
 
             
                 if self.battery_level>=self.max_battery:
-                   
+                  
+                  # DISCHARGING LOOP 
                     # Change battery state to high:
                     self._battery_low = False
                     
                     # Publish current state of the battery:
                     publisher.publish(Bool(self._battery_low))
 
-                    self.battery_change=-self.battery_change/2000
+                    self.battery_change = -self.discharging_battery_change
 
-                elif self.battery_level<=0:
+                elif self.battery_level <= 0:
+
+                    # CHARGING LOOP
                   
                     # Change battery state to low:
                     self._battery_low= True
 
                     # Publish current state of the battery:
                     publisher.publish(Bool(self._battery_low))
-                    self.battery_change=-self.battery_change*2
+                    
                      
 
-                    # Give the robot some time to reach the charging station
-                    time.sleep(8)
+                    # Give the fsm some time to update if the plug is reached
+                    time.sleep(2)
+                   
                                  
-                     
-                        
+                    # WAIT FOR ROBOT TO GET TO POINT
+                    while not self.comunicate_to_agent.is_charging_point_reached():
+                        pass
+                    
+                    self.battery_change= +self.charging_battery_change
+                    
                 
                 time.sleep(self.delay)
-                self.battery_level=self.battery_level + self.battery_change
-
+                self.battery_level = self.battery_level + self.battery_change
+                # print(self.battery_level)
                 if self._battery_low:
 
 
@@ -135,8 +154,7 @@ class RobotState:
                 self._battery_low= True
                 # Publish current state of the battery:
                 publisher.publish(Bool(self._battery_low))
-                # Give the robot some time to reach the charging station
-                time.sleep(9)
+
 
                 self.delay=uniform(1,30)
                 print(simple_colors.red('\n RANDOM ROBOT STATE: Will wait for %d seconds for the battery to change state'%self.delay))
@@ -146,6 +164,13 @@ class RobotState:
                 # Publish current state of the battery:
                 publisher.publish(Bool(self._battery_low))
 
+                # Give the fsm some time to update if the plug is reached
+                time.sleep(2)
+                   
+                                 
+                # WAIT FOR ROBOT TO GET TO POINT
+                while not self.comunicate_to_agent.is_charging_point_reached():
+                    pass
 
 
 if __name__ == "__main__":

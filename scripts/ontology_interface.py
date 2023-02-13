@@ -41,7 +41,7 @@ from armor_api.armor_utils_client import ArmorUtilsClient
 
 
 import random
-import numpy as np
+
 
 
 class HandleOntology():
@@ -54,22 +54,25 @@ class HandleOntology():
 
 	def __init__(self):
 
+		# publish on the arm topic to control it
 		self.pub = rospy.Publisher('/arm_controller/command', JointTrajectory, queue_size=10)
 
+		# set up a client to the ontology server
 		self.client = ArmorClient('surveyor_','map_ontology_')
 		self.locations_list=[]
 		self.doors_list=[]
 		
+		# load basic ontology
 		path = dirname(realpath(__file__)) + '/../ontologies/topological_map.owl'
 		self.client.utils.load_ref_from_file(path, 'http://bnc/exp-rob-lab/2022-23', True, 'PELLET', True, False)
 		self.client.utils.mount_on_ref()
 
-		self.configurations=[ [0,0.8,-0.4,0,-0.8],[0,1.5,-0.4,0,-0.8],[-1.57,1.2,-0.4,0.2,-1],[1.35,1.7,-0.4,0,-0.8],[3.2,0.1,-0.2,0,-0.3],[3,0.3,0.4,0,-0.3],[0.55,1.7,-0.4,0,-0.8]]
+		self.configurations=[ [0,0.8,-0.4,0,-0.8],[0,1.5,-0.4,0,-0.8],[-1.37,0.8,-0.4,0.5,-1],[1.35,1.7,-0.4,0,-0.8],[3.2,0.1,-0.2,0,-0.3],[3,0.3,0.4,0,-0.3],[0.55,1.7,-0.4,0,-0.8]]
 		self.current_configuration=[0,0,0,0,0]
 
 
 		# This is used for reference when printing on screen:
-		self.LINE=150
+		self.LINE=50
 
 	def read_room_create_ontology(self):
 
@@ -237,6 +240,7 @@ class HandleOntology():
 
 	def get_room_layout_service_client(self):
 	   	rospy.wait_for_service('/room_info')
+	   	# rospy.wait_for_service('/armor_interface_srv')
 	   	#print("room info ok")
 	   	try:
 	   		service_handle = rospy.ServiceProxy('/room_info', RoomInformation)
@@ -281,3 +285,111 @@ class HandleOntology():
 		self.move_to_joint_angles( new_config)
 		print ("moved to ")
 		print(new_config)
+
+
+class ChoosingMove(object):
+
+    """
+    This class . 
+    
+    
+
+    """
+
+    def __init__(self):
+
+        # # Instantiate and start the action server based on the `SimpleActionServer` class.
+        # self._as = SimpleActionServer('choose_move',
+        #                               assignment2.msg.ChooseMoveAction,
+        #                               execute_cb=self.execute_callback,
+        #                               auto_start=False)
+        # self._as.start()
+
+        self.client = ArmorClient('surveyor_','map_ontology_')
+    
+    def clean_room_strings(self,room_list):
+
+        clean_room_strings=[]
+        for room_string in room_list:
+            room_string=room_string[32:-1]
+            clean_room_strings.append(room_string)
+        return clean_room_strings  
+
+    def classify_rooms(self,room_list):
+        corridors=[]
+        urgent_rooms=[]
+        non_urgent_rooms=[]
+
+        for room in room_list:
+
+            if self.client.query.check_if_ind_b2_class(room,'CORRIDOR'):
+                corridors.append(room)
+            elif self.client.query.check_if_ind_b2_class(room,'URGENT'):
+                urgent_rooms.append(room)
+            else:
+                non_urgent_rooms.append(room)
+
+        return urgent_rooms, non_urgent_rooms, corridors 
+
+    def chose_room(self):
+
+        # success = True
+        # feedback = ChooseMoveFeedback()
+        # result = ChooseMoveResult()
+
+        # if goal is None :
+        #     rospy.logerr('No choose_move goal provided! This service will be aborted!')
+        #     self._as.set_aborted()
+        #     return
+        
+        # if self._as.is_preempt_requested():
+        #         self._as.set_preempted()
+        #         success = False
+        #         return
+
+
+        self.client.utils.apply_buffered_changes()
+        self.client.utils.sync_buffered_reasoner()
+        reachable_rooms = self.client.query.objectprop_b2_ind('canReach','Robot1')
+        print('\n Reachable rooms are: ')
+        print(self.clean_room_strings(reachable_rooms))
+        
+        urgent_rooms, non_urgent_rooms, corridors=self.classify_rooms(self.clean_room_strings(reachable_rooms))
+
+        print('Urgent rooms: ')
+        print(urgent_rooms)
+        print('Non urgent rooms: ')
+        print(non_urgent_rooms)
+        print('Corridors: ')
+        print(corridors)
+
+        if not urgent_rooms:
+
+            if not corridors or not non_urgent_rooms:
+                go_to = random.choice(non_urgent_rooms+corridors)
+                
+            else:
+
+                if (random.uniform(0, 100)>60):
+                    go_to = random.choice(non_urgent_rooms)
+                else:
+                    go_to = random.choice(corridors)
+
+        else:
+
+            go_to = random.choice(urgent_rooms)
+
+        return go_to
+
+
+        # if self._as.is_preempt_requested():
+        #         self._as.set_preempted()
+        #         success = False
+        #         return
+        
+        # if success:
+        #     print('\n Surveyor will move to location %s \n' %go_to)
+        #     result.chosen_room = go_to
+        #     self._as.set_succeeded(result)
+        #     return
+

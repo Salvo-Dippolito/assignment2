@@ -9,20 +9,28 @@
           type = "robot_state.py"
           name = "robot_state"
           output= "screen"
-         
+          
     > </node>
 
-    <node pkg = "assignment2"  
+<!--     <node pkg = "assignment2"  
           type = "choose_move.py"
           name = "choose_move_server"
           output = "screen"
           
 
-    > </node>
+    > </node> -->
 
         <node pkg = "assignment2"  
           type = "execute_move.py"
           name = "execute_move_server"
+          output = "screen"
+         
+   
+    > </node>
+
+        <node pkg = "assignment2"  
+          type = "surveil_room.py"
+          name = "surveil_room_server"
           output = "screen"
          
    
