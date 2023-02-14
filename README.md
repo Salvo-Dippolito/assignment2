@@ -15,7 +15,7 @@ A few changes have been made compared to the [previous version](https://salvo-di
 
 * A new topic state/reached_charging_point has been added so that the robot_state node can know from the finite state machine that the charging station  as been reached.
 
-* The Choose Move state doesn't use an action server anymore but the Surveil Room state instead now does,since the robot is actually doing something that can be interrupted during the Surveil Room state. The Choose Move action state has been removed since an additional action server proved to be computationally cumbersome for ros, dragging down the simulation performance. The Choose Move State is now very similar in structure to the Load Map state, with only one output to the Execute Move state.
+* The Choose Move state doesn't use an action server anymore but the Surveil Room state instead now does,since the robot is actually doing something that can be interrupted during the Surveil Room state. The Choose Move action server has been removed since an additional action server proved to be computationally cumbersome for ros, dragging down the simulation performance. The Choose Move State is now very similar in structure to the Load Map state, with only one output to the Execute Move state.
 
 * To move the arm in the Surveil Room state, the surveil_room_server sets itself as a publisher on the /arm_controller/command topic, where it sends the desired joint configurations for the robot's arm.
 
