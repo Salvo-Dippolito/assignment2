@@ -32,9 +32,13 @@ used in this project's previous version. In read_room_create_ontology the arm is
 
 This is the updated project's UML diagram:
 
-![UML (1) drawio](https://user-images.githubusercontent.com/63560239/218599063-ffe47909-6b25-4ac3-90f3-7f5ba20bb692.png)
+![UML_corretto](https://user-images.githubusercontent.com/63560239/218745054-cf5caa3d-0331-4a60-9b6b-dfe163237be7.jpg)
 
-The state machine node subscribes to the robot state node through the use of an interface class called AgentState. Through an instance of this class the state machine node is also set up as a client to the two action servers /surveil_room_server and /execute_move_server. Almost all nodes (except the robot_state and the surveil_room nodes) are set up as clients to the armor service, the state machine node gets set as a client through the use of a class called HandleOntology.
+
+The state machine node subscribes to the robot state node through the use of an interface class called AgentState. Through an instance of this class the state machine node is also set up as a client to the two action servers /surveil_room_server and /execute_move_server and as publisher on the . Almost all nodes (except the robot_state and the surveil_room nodes) are set up as clients to the armor service, the state machine node gets set as a client through the use of a class called HandleOntology and publishes on /arm_controller/command topic through an object of HandleOntology called read_room_create_ontology. This object also sets the robot as a client to the /get_marker_id and /room_info server servers. 
+Also the SurveilRoom action server publishes on /arm_controller/command topic to control the robot arm.
+
+One last modification from the previous version is that the ExecuteMove action server now also takes room coordinates as part of its goal request.
 
 
 ### State Machine Structure
