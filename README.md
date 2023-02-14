@@ -128,9 +128,14 @@ could also be used instead of the current setup where joint angles are directly 
 The initial state could also read the markers more quickly by using a publisher subscriber architecture instead of a service based architecture. 
 In future iterations of this project a different planning algorithm can be used to try to overcome the issues described in the System's Limitations paragraph.
 
+## Video Demonstration
+
+A long video demonstration of this project in action is available on youtube at [this link](https://www.youtube.com/watch?v=hqCuiGLzAFw).
+Skipping through this video we can see the various phases of the state machine described in this Readme. After a while the world's objects are moved around the robot to check the system's response to unpredictable changes. The last half hour of video was added both for enjoyment and to show how the system reacts to its main cores being shut down.
 
 ## Author's contacts
 
 - Personal e-mail: salvo.dipp@gmail.com
 - Institutional e-mail: s5324750@studenti.unige.it
+
 
