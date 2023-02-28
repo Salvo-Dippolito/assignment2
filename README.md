@@ -55,11 +55,11 @@ The robot then enters its main routine which has been subdivided in three main a
 As shown in the documentation, the charging state is actually comprised of a two-phased task: moving back to the charging station and then waiting for the battery to charge. In this state the /execute_move_action_server is called with the chosen location preset as room 'E'.
 
 In this next gif it's possible to see what is shown to the user when the Surveil Room state is interrupted by the Charging state: 
-![](https://github.com/Salvo-Dippolito/assignment2/blob/main/images/interrupt_surveil.gif)
+![](https://github.com/Salvo-Dippolito/assignment2/blob/master/images/interrupt_surveil.gif)
 
 
 Here is instead shown an example of user interaction in the initial state Load Map:
-![](https://github.com/Salvo-Dippolito/assignment2/blob/main/images/load_map.gif)
+![](https://github.com/Salvo-Dippolito/assignment2/blob/master/images/load_map.gif)
 
 Side note: in the code and its documentation the verb 'surveil' has often been wrongfully substituted with the verb 'survey'.
 
