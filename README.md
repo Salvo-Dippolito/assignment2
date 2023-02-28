@@ -6,7 +6,7 @@ This code was developed as a solution to the second assignment of the Experiment
 
 The robot should move around its environment giving priority to the rooms it hasn't visited for more than a certain threshold of time set by the user, the rooms that satisfy this condition are considered 'urgent'. The robot agent also has a simulated battery charging and discharging cycle that triggers it to stop executing its tasks so that it can move to a specific room E where it can plug in and recharge.
 
-This repository contains version 1.5 of this project, version 1.0 is instead fount in [this other repository](https://github.com/Salvo-Dippolito/ontological_surveyor)
+This repository contains version 1.5 of this project, version 1.0 is instead found in [this other repository](https://github.com/Salvo-Dippolito/ontological_surveyor)
 
 ## Software Architecture
 This project depends on one main node, two action servers, the armor service and a robot state notifications node. The details of how these components work together are shown in this project's [documentation](https://salvo-dippolito.github.io/assignment2/).
